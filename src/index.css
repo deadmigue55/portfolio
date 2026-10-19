@@ -2,12 +2,80 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 
-* {
-  scroll-behavior: smooth;
-}
+* { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', sans-serif;
   background-color: #0a0a0f;
   color: #e2e8f0;
 }
+
+/* ── Neon symbol float animations ── */
+@keyframes float-a {
+  0%,100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  30%      { transform: translateY(-22px) rotate(6deg) scale(1.05); }
+  65%      { transform: translateY(-10px) rotate(-4deg) scale(0.97); }
+}
+@keyframes float-b {
+  0%,100% { transform: translateY(0px) rotate(0deg); }
+  40%      { transform: translateY(-30px) rotate(-8deg); }
+  70%      { transform: translateY(-14px) rotate(5deg); }
+}
+@keyframes float-c {
+  0%,100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+  25%      { transform: translateY(-18px) translateX(10px) rotate(10deg); }
+  60%      { transform: translateY(-28px) translateX(-8px) rotate(-5deg); }
+  80%      { transform: translateY(-8px) translateX(5px) rotate(3deg); }
+}
+
+/* ── Neon pulse glow (per color) ── */
+@keyframes neon-pulse-blue {
+  0%,100% {
+    text-shadow: 0 0 4px #fff, 0 0 10px #00d4ff, 0 0 25px #00d4ff, 0 0 50px #00d4ff;
+    opacity: 0.5;
+  }
+  50% {
+    text-shadow: 0 0 8px #fff, 0 0 20px #00d4ff, 0 0 50px #00d4ff, 0 0 100px #00d4ff, 0 0 160px #00d4ff;
+    opacity: 0.95;
+  }
+}
+@keyframes neon-pulse-violet {
+  0%,100% {
+    text-shadow: 0 0 4px #fff, 0 0 10px #a78bfa, 0 0 25px #a78bfa, 0 0 50px #a78bfa;
+    opacity: 0.4;
+  }
+  50% {
+    text-shadow: 0 0 8px #fff, 0 0 20px #a78bfa, 0 0 50px #a78bfa, 0 0 100px #a78bfa;
+    opacity: 0.88;
+  }
+}
+@keyframes neon-pulse-cyan {
+  0%,100% {
+    text-shadow: 0 0 4px #fff, 0 0 10px #22d3ee, 0 0 25px #22d3ee, 0 0 50px #22d3ee;
+    opacity: 0.38;
+  }
+  50% {
+    text-shadow: 0 0 8px #fff, 0 0 20px #22d3ee, 0 0 50px #22d3ee, 0 0 90px #22d3ee;
+    opacity: 0.82;
+  }
+}
+@keyframes neon-pulse-indigo {
+  0%,100% {
+    text-shadow: 0 0 4px #fff, 0 0 10px #818cf8, 0 0 25px #818cf8, 0 0 50px #818cf8;
+    opacity: 0.42;
+  }
+  50% {
+    text-shadow: 0 0 8px #fff, 0 0 20px #818cf8, 0 0 50px #818cf8, 0 0 100px #818cf8;
+    opacity: 0.87;
+  }
+}
+
+/* ── Convenience animation classes ── */
+.neon-blue   { animation: neon-pulse-blue   3s   ease-in-out infinite; color: #e0f7ff; }
+.neon-violet { animation: neon-pulse-violet 4s   ease-in-out infinite; color: #ede9fe; }
+.neon-cyan   { animation: neon-pulse-cyan   3.5s ease-in-out infinite; color: #cffafe; }
+.neon-indigo { animation: neon-pulse-indigo 5s   ease-in-out infinite; color: #e0e7ff; }
+
+.float-a { animation: float-a var(--dur, 7s)  ease-in-out var(--delay, 0s) infinite; }
+.float-b { animation: float-b var(--dur, 9s)  ease-in-out var(--delay, 0s) infinite; }
+.float-c { animation: float-c var(--dur, 11s) ease-in-out var(--delay, 0s) infinite; }

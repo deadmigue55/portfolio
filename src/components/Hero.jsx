@@ -1,48 +1,76 @@
+import NeonSymbols from './NeonSymbols'
+import NeonButton from './NeonButton'
+
 export default function Hero() {
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center px-6 pt-20">
-      <div className="max-w-5xl mx-auto w-full">
+    <section id="home" className="relative min-h-screen flex items-center justify-center px-6 pt-20 overflow-hidden">
 
-        {/* Subtle badge */}
+      {/* Floating neon math symbols */}
+      <NeonSymbols />
+
+      {/* Deep radial background glow */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div style={{
+          position: 'absolute',
+          top: '30%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '700px', height: '500px',
+          background: 'radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, rgba(0,212,255,0.05) 40%, transparent 70%)',
+          filter: 'blur(40px)',
+        }} />
+      </div>
+
+      <div className="max-w-5xl mx-auto w-full relative z-10">
+
+        {/* Status badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-          Open to data science & fintech roles
+          Open to data science &amp; fintech roles · Mexico City / Remote
         </div>
 
         {/* Main heading */}
         <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
           Miguel<br />
-          <span className="italic font-normal" style={{ fontFamily: 'Instrument Serif, serif' }}>
+          <span
+            className="italic font-normal"
+            style={{
+              fontFamily: 'Instrument Serif, serif',
+              background: 'linear-gradient(90deg, #a5b4fc 0%, #22d3ee 50%, #818cf8 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
             Vilchis
           </span>
         </h1>
 
         {/* Tagline */}
         <p className="text-xl md:text-2xl text-slate-400 font-light mb-4 max-w-2xl">
-          Actuary · Reinsurance · Data Science
+          Actuary · Quant Risk · Data Scientist
         </p>
 
         <p className="text-slate-500 max-w-xl leading-relaxed mb-10">
-          Quantitative thinker from <span className="text-slate-300">Facultad de Ciencias, UNAM</span>.
-          Currently interning at <span className="text-slate-300">SCOR</span>, building data skills on the side —
-          aiming to bring an actuarial edge to modern data science and fintech.
+          Probabilistic thinker from{' '}
+          <span className="text-slate-300">Facultad de Ciencias, UNAM</span>.
+          Turning stochastic models and actuarial intuition into production-ready
+          data science at <span className="text-slate-300">SCOR</span> —
+          one of the world's top reinsurers. Building the bridge between
+          classical probability theory and modern machine learning.
         </p>
 
-        {/* CTAs */}
+        {/* LED Neon CTAs */}
         <div className="flex flex-wrap gap-4">
-          <a href="#projects"
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors duration-200">
+          <NeonButton href="#projects" variant="primary">
             View Projects
-          </a>
-          <a href="#contact"
-            className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-lg text-sm font-medium transition-colors duration-200">
+          </NeonButton>
+          <NeonButton href="#contact" variant="ghost">
             Get in Touch
-          </a>
+          </NeonButton>
         </div>
 
         {/* Scroll hint */}
-        <div className="mt-20 flex items-center gap-3 text-slate-600 text-xs">
-          <div className="w-px h-8 bg-slate-700"></div>
+        <div className="mt-20 flex items-center gap-3 text-slate-700 text-xs">
+          <div className="w-px h-8 bg-slate-800"></div>
           scroll to explore
         </div>
       </div>
