@@ -1,9 +1,13 @@
+import { useRef, useState } from 'react'
 import NeonButton from './NeonButton'
+import SectionHeader from './SectionHeader'
+import { StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview } from './Previews'
 
 const categories = [
   {
     label: 'Probability & Statistical Theory',
     color: 'indigo',
+    Preview: StatsPreview,
     skills: [
       'A/B Testing & Hypothesis Testing',
       'Bayesian Inference & MCMC',
@@ -18,6 +22,7 @@ const categories = [
   {
     label: 'Actuarial Science',
     color: 'violet',
+    Preview: ActuarialPreview,
     skills: [
       'IBNR Reserving (Chain Ladder, BF)',
       'Pricing & Experience Rating',
@@ -32,6 +37,7 @@ const categories = [
   {
     label: 'Quantitative Finance & ML',
     color: 'cyan',
+    Preview: QuantPreview,
     skills: [
       'Credit Risk Scoring (PD, LGD, EAD)',
       'Monte Carlo Simulation',
@@ -46,6 +52,7 @@ const categories = [
   {
     label: 'Data Engineering & Tools',
     color: 'sky',
+    Preview: ToolsPreview,
     skills: [
       'Python (Pandas, NumPy, sklearn)',
       'R (actuarial packages)',
@@ -53,7 +60,7 @@ const categories = [
       'Git & GitHub',
       'Jupyter & Streamlit',
       'Excel (VBA, Solver, PivotTables)',
-      'Tableau (learning)',
+      'AI-assisted development (Claude Code)',
       'LaTeX (mathematical typesetting)',
     ],
   },
@@ -65,8 +72,6 @@ const colorMap = {
   cyan:   { tag: 'bg-cyan-500/10   text-cyan-300   border-cyan-500/20',   header: 'text-cyan-400',   glow: 'rgba(34,211,238,0.6)'  },
   sky:    { tag: 'bg-sky-500/10    text-sky-300    border-sky-500/20',    header: 'text-sky-400',    glow: 'rgba(56,189,248,0.6)'  },
 }
-
-import { useRef, useState } from 'react'
 
 function NeonCard({ cat }) {
   const ref = useRef(null)
@@ -86,7 +91,7 @@ function NeonCard({ cat }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden p-6 rounded-xl border border-white/5 bg-white/[0.02] transition-all duration-300"
+      className="relative overflow-hidden p-6 rounded-xl border border-white/5 bg-[#0c0c14]/70 backdrop-blur-sm transition-all duration-300"
       style={{
         borderColor: hovered ? c.glow.replace('0.6', '0.35') : undefined,
         boxShadow: hovered ? `0 0 30px ${c.glow.replace('0.6', '0.1')}, inset 0 0 30px ${c.glow.replace('0.6', '0.03')}` : undefined,
@@ -101,6 +106,10 @@ function NeonCard({ cat }) {
           background: `radial-gradient(circle 140px at ${pos.x}px ${pos.y}px, ${c.glow.replace('0.6', '0.12')} 0%, transparent 70%)`,
         }}
       />
+
+      <div className="relative z-10 mb-5">
+        <cat.Preview />
+      </div>
 
       <h3 className={`${c.header} font-semibold mb-4 text-sm tracking-wide uppercase relative z-10`}>
         {cat.label}
@@ -121,14 +130,9 @@ export default function Skills() {
     <section id="skills" className="py-28 px-6 bg-white/[0.015]">
       <div className="max-w-5xl mx-auto">
 
-        <p className="text-indigo-400 text-sm font-medium mb-3 tracking-widest uppercase">Skills</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-          What I bring to the table
-        </h2>
-        <p className="text-slate-500 mb-12 max-w-xl">
-          A rare combination of actuarial rigor, statistical depth, and data engineering chops.
-          Hover the cards.
-        </p>
+        <SectionHeader eyebrow="Skills" title="What I bring to the table">
+          Actuarial rigor, statistical depth and the engineering to turn them into working tools.
+        </SectionHeader>
 
         <div className="grid md:grid-cols-2 gap-6">
           {categories.map(cat => (
@@ -137,11 +141,11 @@ export default function Skills() {
         </div>
 
         {/* Certs / learning callout */}
-        <div className="mt-10 p-5 rounded-xl border border-white/5 bg-white/[0.02] flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="neon-ring mt-10 p-5 rounded-xl border border-white/10 bg-[#0c0c14]/80 flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
-            <p className="text-slate-300 font-medium">Currently pursuing</p>
-            <p className="text-slate-500 text-sm mt-1">
-              Google Professional Data Analytics Certificate · Kaggle ML competitions · CAS Exam P (review)
+            <p className="text-slate-200 font-medium">Currently leveling up</p>
+            <p className="text-slate-400 text-sm mt-1">
+              SOA Exam FM · Building AI-powered apps with LLM APIs · Full-stack development with React
             </p>
           </div>
           <NeonButton href="#contact" variant="ghost">

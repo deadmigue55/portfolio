@@ -1,43 +1,81 @@
-// Floating neon math/actuarial symbols in the background
+import { useEffect } from 'react'
+
+// Floating neon math/actuarial symbols, fixed behind the whole page.
+// tone: blue shade · drift: movement path · dur: drift time
+// flash: flicker cycle length · fd: flicker offset (negative = starts mid-cycle)
+// desk: only shown on wider screens (keeps phones uncluttered)
 const symbols = [
-  // symbol, float class, neon class, position, font-size, delay, duration
-  { s: 'Σ',       f: 'float-a', n: 'neon-blue',   top: '12%', left: '5%',  size: '3.5rem', delay: '0s',    dur: '8s'  },
-  { s: 'σ²',      f: 'float-b', n: 'neon-violet', top: '20%', left: '88%', size: '2.8rem', delay: '1.2s',  dur: '10s' },
-  { s: 'μ',       f: 'float-c', n: 'neon-cyan',   top: '55%', left: '3%',  size: '3rem',   delay: '0.5s',  dur: '7s'  },
-  { s: '∫',       f: 'float-a', n: 'neon-indigo', top: '70%', left: '90%', size: '3.8rem', delay: '2s',    dur: '9s'  },
-  { s: 'λ',       f: 'float-b', n: 'neon-blue',   top: '40%', left: '93%', size: '2.5rem', delay: '0.8s',  dur: '11s' },
-  { s: 'P(A|B)',  f: 'float-c', n: 'neon-violet', top: '80%', left: '8%',  size: '1.4rem', delay: '1.5s',  dur: '13s' },
-  { s: 'χ²',     f: 'float-a', n: 'neon-cyan',   top: '8%',  left: '75%', size: '2.6rem', delay: '3s',    dur: '8.5s'},
-  { s: 'E[X]',   f: 'float-b', n: 'neon-indigo', top: '85%', left: '60%', size: '1.5rem', delay: '0.3s',  dur: '10s' },
-  { s: '∂',      f: 'float-c', n: 'neon-blue',   top: '30%', left: '8%',  size: '2.8rem', delay: '2.5s',  dur: '12s' },
-  { s: 'Φ(z)',   f: 'float-a', n: 'neon-violet', top: '62%', left: '78%', size: '1.6rem', delay: '1.8s',  dur: '9.5s'},
-  { s: '∇',      f: 'float-b', n: 'neon-cyan',   top: '48%', left: '50%', size: '3rem',   delay: '4s',    dur: '14s' },
-  { s: 'α',      f: 'float-c', n: 'neon-indigo', top: '15%', left: '40%', size: '2.2rem', delay: '0.7s',  dur: '7.5s'},
-  { s: 'β',      f: 'float-a', n: 'neon-blue',   top: '90%', left: '35%', size: '2.4rem', delay: '3.5s',  dur: '11s' },
-  { s: 'π',      f: 'float-b', n: 'neon-violet', top: '75%', left: '25%', size: '2rem',   delay: '1s',    dur: '8s'  },
-  { s: 'Var(X)', f: 'float-c', n: 'neon-cyan',   top: '5%',  left: '55%', size: '1.3rem', delay: '2.2s',  dur: '10s' },
-  { s: 'ρ',      f: 'float-a', n: 'neon-indigo', top: '35%', left: '70%', size: '2.6rem', delay: '0.4s',  dur: '9s'  },
+  { s: 'Σ',      tone: 'electric', drift: 'a', top: '12%', left: '5%',  size: '3.5rem', dur: '16s', flash: '9s',  fd: '-1s'  },
+  { s: 'σ²',     tone: 'sky',      drift: 'b', top: '20%', left: '88%', size: '2.8rem', dur: '20s', flash: '11s', fd: '-6s'  },
+  { s: 'μ',      tone: 'cobalt',   drift: 'c', top: '55%', left: '3%',  size: '3rem',   dur: '14s', flash: '8s',  fd: '-3s'  },
+  { s: '∫',      tone: 'electric', drift: 'a', top: '70%', left: '90%', size: '3.8rem', dur: '18s', flash: '12s', fd: '-9s'  },
+  { s: 'λ',      tone: 'sky',      drift: 'c', top: '40%', left: '93%', size: '2.5rem', dur: '22s', flash: '10s', fd: '-2s'  },
+  { s: 'P(A|B)', tone: 'cobalt',   drift: 'b', top: '80%', left: '8%',  size: '1.4rem', dur: '26s', flash: '13s', fd: '-7s',  desk: true },
+  { s: 'χ²',     tone: 'electric', drift: 'b', top: '8%',  left: '75%', size: '2.6rem', dur: '17s', flash: '9.5s',fd: '-5s'  },
+  { s: 'E[X]',   tone: 'sky',      drift: 'a', top: '85%', left: '60%', size: '1.5rem', dur: '20s', flash: '11.5s',fd: '-10s', desk: true },
+  { s: '∂',      tone: 'cobalt',   drift: 'c', top: '30%', left: '8%',  size: '2.8rem', dur: '24s', flash: '8.5s',fd: '-4s'  },
+  { s: 'Φ(z)',   tone: 'electric', drift: 'a', top: '62%', left: '78%', size: '1.6rem', dur: '19s', flash: '12.5s',fd: '-8s', desk: true },
+  { s: '∇',      tone: 'sky',      drift: 'b', top: '48%', left: '50%', size: '3rem',   dur: '28s', flash: '14s', fd: '-11s', desk: true },
+  { s: 'α',      tone: 'cobalt',   drift: 'c', top: '15%', left: '40%', size: '2.2rem', dur: '15s', flash: '10.5s',fd: '-1.5s', desk: true },
+  { s: 'β',      tone: 'electric', drift: 'a', top: '90%', left: '35%', size: '2.4rem', dur: '22s', flash: '9s',  fd: '-6.5s' },
+  { s: 'π',      tone: 'sky',      drift: 'b', top: '75%', left: '25%', size: '2rem',   dur: '16s', flash: '13.5s',fd: '-12s', desk: true },
+  { s: 'Var(X)', tone: 'cobalt',   drift: 'c', top: '5%',  left: '55%', size: '1.3rem', dur: '20s', flash: '11s', fd: '-3.5s', desk: true },
+  { s: 'ρ',      tone: 'electric', drift: 'a', top: '35%', left: '70%', size: '2.6rem', dur: '18s', flash: '10s', fd: '-8.5s', desk: true },
 ]
 
+// Dims the glow, fades out the flashes and shrinks the movement as you scroll,
+// so the hero is flashy and the rest of the page stays calm.
+function useScrollFade() {
+  useEffect(() => {
+    const root = document.documentElement
+    let raf = 0
+
+    const update = () => {
+      raf = 0
+      const screens = window.scrollY / window.innerHeight
+      const e = Math.exp(-screens / 1.2)           // 1 at top → ~0 far down
+      root.style.setProperty('--bg-glow', (0.15 + 0.85 * e).toFixed(3))
+      root.style.setProperty('--bg-flash', Math.pow(e, 1.5).toFixed(3))
+      root.style.setProperty('--bg-amp', (0.3 + 0.7 * e).toFixed(3))
+    }
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
+
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+}
+
 export default function NeonSymbols() {
+  useScrollFade()
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+    <div className="neon-bg" aria-hidden="true">
+      <div className="ns-ambient ns-ambient-1" />
+      <div className="ns-ambient ns-ambient-2" />
+
       {symbols.map((sym, i) => (
         <span
           key={i}
-          className={`absolute font-bold ${sym.f} ${sym.n}`}
+          className={`ns-drift ns-drift-${sym.drift} ns-tone-${sym.tone} ${sym.desk ? 'max-sm:hidden' : ''}`}
           style={{
             top: sym.top,
             left: sym.left,
             fontSize: sym.size,
-            '--delay': sym.delay,
             '--dur': sym.dur,
-            fontFamily: 'serif',
-            userSelect: 'none',
-            zIndex: 0,
+            '--flash': sym.flash,
+            '--fd': sym.fd,
           }}
         >
-          {sym.s}
+          <span className="ns-glyph ns-pulse">{sym.s}</span>
+          <span className="ns-flash-wrap">
+            <span className="ns-glyph ns-flash">{sym.s}</span>
+          </span>
         </span>
       ))}
     </div>

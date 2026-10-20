@@ -10,72 +10,245 @@ body {
   color: #e2e8f0;
 }
 
-/* ── Neon symbol float animations ── */
-@keyframes float-a {
-  0%,100% { transform: translateY(0px) rotate(0deg) scale(1); }
-  30%      { transform: translateY(-22px) rotate(6deg) scale(1.05); }
-  65%      { transform: translateY(-10px) rotate(-4deg) scale(0.97); }
-}
-@keyframes float-b {
-  0%,100% { transform: translateY(0px) rotate(0deg); }
-  40%      { transform: translateY(-30px) rotate(-8deg); }
-  70%      { transform: translateY(-14px) rotate(5deg); }
-}
-@keyframes float-c {
-  0%,100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
-  25%      { transform: translateY(-18px) translateX(10px) rotate(10deg); }
-  60%      { transform: translateY(-28px) translateX(-8px) rotate(-5deg); }
-  80%      { transform: translateY(-8px) translateX(5px) rotate(3deg); }
+/* ════════════════════════════════════════════
+   Neon background (NeonSymbols.jsx)
+   --bg-glow / --bg-flash / --bg-amp are set from
+   scroll position: 1 at the top, smaller further down.
+   ════════════════════════════════════════════ */
+
+.neon-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  opacity: var(--bg-glow, 1);
 }
 
-/* ── Neon pulse glow (per color) ── */
-@keyframes neon-pulse-blue {
-  0%,100% {
-    text-shadow: 0 0 4px #fff, 0 0 10px #00d4ff, 0 0 25px #00d4ff, 0 0 50px #00d4ff;
-    opacity: 0.5;
-  }
-  50% {
-    text-shadow: 0 0 8px #fff, 0 0 20px #00d4ff, 0 0 50px #00d4ff, 0 0 100px #00d4ff, 0 0 160px #00d4ff;
-    opacity: 0.95;
-  }
+/* Blue shades */
+.ns-tone-electric { --c: #00d4ff; --core: #e6faff; }
+.ns-tone-sky      { --c: #3b9eff; --core: #e3f0ff; }
+.ns-tone-cobalt   { --c: #2f6bff; --core: #dde7ff; }
+
+/* Movement: slow wandering paths, scaled by --bg-amp */
+.ns-drift {
+  position: absolute;
+  font-family: serif;
+  font-weight: 700;
+  line-height: 1;
+  will-change: transform;
 }
-@keyframes neon-pulse-violet {
-  0%,100% {
-    text-shadow: 0 0 4px #fff, 0 0 10px #a78bfa, 0 0 25px #a78bfa, 0 0 50px #a78bfa;
-    opacity: 0.4;
-  }
-  50% {
-    text-shadow: 0 0 8px #fff, 0 0 20px #a78bfa, 0 0 50px #a78bfa, 0 0 100px #a78bfa;
-    opacity: 0.88;
-  }
+.ns-drift-a { animation: ns-drift-a var(--dur, 18s) ease-in-out infinite; }
+.ns-drift-b { animation: ns-drift-b var(--dur, 20s) ease-in-out infinite; }
+.ns-drift-c { animation: ns-drift-c var(--dur, 22s) ease-in-out infinite; }
+
+@keyframes ns-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  33% { transform: translate3d(calc(26px * var(--bg-amp, 1)), calc(-40px * var(--bg-amp, 1)), 0) rotate(calc(8deg * var(--bg-amp, 1))); }
+  66% { transform: translate3d(calc(-18px * var(--bg-amp, 1)), calc(-16px * var(--bg-amp, 1)), 0) rotate(calc(-6deg * var(--bg-amp, 1))); }
 }
-@keyframes neon-pulse-cyan {
-  0%,100% {
-    text-shadow: 0 0 4px #fff, 0 0 10px #22d3ee, 0 0 25px #22d3ee, 0 0 50px #22d3ee;
-    opacity: 0.38;
-  }
-  50% {
-    text-shadow: 0 0 8px #fff, 0 0 20px #22d3ee, 0 0 50px #22d3ee, 0 0 90px #22d3ee;
-    opacity: 0.82;
-  }
+@keyframes ns-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  40% { transform: translate3d(calc(-30px * var(--bg-amp, 1)), calc(-34px * var(--bg-amp, 1)), 0) rotate(calc(-9deg * var(--bg-amp, 1))); }
+  75% { transform: translate3d(calc(14px * var(--bg-amp, 1)), calc(-12px * var(--bg-amp, 1)), 0) rotate(calc(5deg * var(--bg-amp, 1))); }
 }
-@keyframes neon-pulse-indigo {
-  0%,100% {
-    text-shadow: 0 0 4px #fff, 0 0 10px #818cf8, 0 0 25px #818cf8, 0 0 50px #818cf8;
-    opacity: 0.42;
-  }
-  50% {
-    text-shadow: 0 0 8px #fff, 0 0 20px #818cf8, 0 0 50px #818cf8, 0 0 100px #818cf8;
-    opacity: 0.87;
-  }
+@keyframes ns-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  25% { transform: translate3d(calc(20px * var(--bg-amp, 1)), calc(-22px * var(--bg-amp, 1)), 0) rotate(calc(10deg * var(--bg-amp, 1))); }
+  55% { transform: translate3d(calc(-24px * var(--bg-amp, 1)), calc(-38px * var(--bg-amp, 1)), 0) rotate(calc(-6deg * var(--bg-amp, 1))); }
+  80% { transform: translate3d(calc(10px * var(--bg-amp, 1)), calc(-10px * var(--bg-amp, 1)), 0) rotate(calc(3deg * var(--bg-amp, 1))); }
 }
 
-/* ── Convenience animation classes ── */
-.neon-blue   { animation: neon-pulse-blue   3s   ease-in-out infinite; color: #e0f7ff; }
-.neon-violet { animation: neon-pulse-violet 4s   ease-in-out infinite; color: #ede9fe; }
-.neon-cyan   { animation: neon-pulse-cyan   3.5s ease-in-out infinite; color: #cffafe; }
-.neon-indigo { animation: neon-pulse-indigo 5s   ease-in-out infinite; color: #e0e7ff; }
+/* Glyphs: the glow is static, only opacity animates (cheap to render) */
+.ns-glyph {
+  display: block;
+  color: var(--core);
+  text-shadow:
+    0 0 2px #fff,
+    0 0 8px var(--c),
+    0 0 20px var(--c),
+    0 0 44px var(--c);
+}
 
-.float-a { animation: float-a var(--dur, 7s)  ease-in-out var(--delay, 0s) infinite; }
-.float-b { animation: float-b var(--dur, 9s)  ease-in-out var(--delay, 0s) infinite; }
-.float-c { animation: float-c var(--dur, 11s) ease-in-out var(--delay, 0s) infinite; }
+/* Steady layer: slow breathing */
+.ns-pulse {
+  opacity: 0.4;
+  animation: ns-pulse calc(var(--flash, 10s) / 2.5) ease-in-out var(--fd, 0s) infinite;
+  will-change: opacity;
+}
+@keyframes ns-pulse {
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.7; }
+}
+
+/* Flash layer: neon tube flickering on, then fading */
+.ns-flash-wrap {
+  position: absolute;
+  inset: 0;
+  opacity: var(--bg-flash, 1);
+}
+.ns-flash {
+  color: #f4fcff;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 12px var(--c),
+    0 0 30px var(--c),
+    0 0 70px var(--c),
+    0 0 120px var(--c);
+  opacity: 0;
+  animation: ns-flicker var(--flash, 10s) linear var(--fd, 0s) infinite;
+  will-change: opacity;
+}
+@keyframes ns-flicker {
+  0%, 58%  { opacity: 0; }
+  59%      { opacity: 1; }
+  60%      { opacity: 0.15; }
+  61.5%    { opacity: 0.9; }
+  62.5%    { opacity: 0.05; }
+  64%      { opacity: 1; }
+  72%      { opacity: 0.85; }
+  82%, 100% { opacity: 0; }
+}
+
+/* Soft blue light pools that slowly breathe */
+.ns-ambient {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  will-change: opacity, transform;
+}
+.ns-ambient-1 {
+  top: -10%; left: -10%;
+  width: 55vw; height: 55vw;
+  background: radial-gradient(circle, rgba(0, 150, 255, 0.16), transparent 65%);
+  animation: ns-ambient 14s ease-in-out infinite;
+}
+.ns-ambient-2 {
+  bottom: -15%; right: -10%;
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, rgba(47, 107, 255, 0.14), transparent 65%);
+  animation: ns-ambient 18s ease-in-out -7s infinite;
+}
+@keyframes ns-ambient {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+
+/* Visitors who ask for less motion get a calm, still glow */
+@media (prefers-reduced-motion: reduce) {
+  .ns-drift, .ns-pulse, .ns-flash, .ns-ambient { animation: none !important; }
+  .ns-pulse { opacity: 0.45; }
+  .ns-flash { opacity: 0; }
+}
+
+/* ════════════════════════════════════════════
+   Neon accents (used across sections)
+   ════════════════════════════════════════════ */
+
+/* Lets the conic gradient angle animate smoothly */
+@property --neon-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes neon-spin  { to { --neon-angle: 360deg; } }
+@keyframes neon-slide { to { background-position: 300% 0; } }
+@keyframes neon-breathe {
+  0%, 100% { box-shadow: 0 0 6px rgba(0, 212, 255, 0.6), 0 0 14px rgba(0, 212, 255, 0.25); }
+  50%      { box-shadow: 0 0 10px rgba(0, 212, 255, 0.9), 0 0 26px rgba(0, 212, 255, 0.45); }
+}
+
+/* Small uppercase label above section headings */
+.neon-eyebrow {
+  color: #7dd3fc;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.65), 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+/* Animated light bar under section headings */
+.neon-bar {
+  display: block;
+  height: 3px;
+  width: 72px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #00d4ff, #3b82f6, #8b5cf6, #22d3ee, #00d4ff);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.55);
+  animation: neon-slide 6s linear infinite;
+}
+
+/* Spinning chroma border + outer glow on hover */
+.neon-ring {
+  position: relative;
+  isolation: isolate;
+}
+.neon-ring::before,
+.neon-ring::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--neon-angle), #00d4ff, #3b82f6, #8b5cf6, #22d3ee, #00d4ff);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  animation: neon-spin 4s linear infinite;
+}
+.neon-ring::before {
+  padding: 1.5px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 2;
+}
+.neon-ring::after {
+  filter: blur(16px);
+  z-index: -1;
+}
+.neon-ring:hover::before,
+.neon-ring:focus-within::before { opacity: 1; }
+.neon-ring:hover::after,
+.neon-ring:focus-within::after  { opacity: 0.4; }
+
+/* Glowing timeline / status dots */
+.neon-dot { background: #00d4ff; animation: neon-breathe 3s ease-in-out infinite; }
+
+/* Hero surname: shifting blue gradient with a glow */
+.neon-name {
+  background: linear-gradient(90deg, #a5b4fc, #22d3ee, #3b82f6, #818cf8, #a5b4fc);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.35));
+  animation: neon-slide 10s linear infinite;
+}
+
+/* Nav links light up on hover */
+.nav-link { transition: color 0.2s, text-shadow 0.2s; }
+.nav-link:hover {
+  color: #e0f2fe;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.8), 0 0 18px rgba(56, 189, 248, 0.4);
+}
+
+/* Cursor spotlight in the hero (mouse/trackpad only) */
+.hero-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 40%), rgba(0, 180, 255, 0.11), transparent 70%);
+}
+@media (hover: hover) {
+  .hero-spotlight.is-on { opacity: 1; }
+}
+
+/* Blinking text cursor in the email preview */
+@keyframes caret-blink { 50% { opacity: 0; } }
+.caret { animation: caret-blink 1s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-bar, .neon-ring::before, .neon-ring::after,
+  .neon-dot, .neon-name, .caret { animation: none !important; }
+}
