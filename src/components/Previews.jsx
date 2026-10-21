@@ -21,9 +21,9 @@ const loop = (delay = 0, duration = 1.6) => ({
   repeat: Infinity, repeatType: 'reverse', repeatDelay: 2.4,
 })
 
-function Frame({ label, children, className = '' }) {
+function Frame({ label, children, className = '', height = 'h-28' }) {
   return (
-    <div className={`relative h-28 overflow-hidden rounded-lg border border-white/5 bg-gradient-to-br from-[#0b1a33]/80 via-[#0a0f1f]/70 to-[#0a0a12]/40 ${className}`} aria-hidden="true">
+    <div className={`relative ${height} overflow-hidden rounded-lg border border-white/5 bg-gradient-to-br from-[#0b1a33]/80 via-[#0a0f1f]/70 to-[#0a0a12]/40 ${className}`} aria-hidden="true">
       {children}
       {label && (
         <span className="absolute top-2 left-2 z-10 rounded bg-black/40 px-1.5 py-0.5 font-mono text-[10px] text-sky-300/90">
@@ -217,9 +217,9 @@ const mortCurve = shift => Array.from({ length: 51 }, (_, k) => {
   return [(k / 50) * 200, 74 - 64 * q]
 })
 
-export function MortalityPreview() {
+export function MortalityPreview({ height }) {
   return (
-    <Frame label="qₓ by age">
+    <Frame label="qₓ by age" height={height}>
       <Svg>
         <DrawPath d={toPath(mortCurve(0))} color="#22d3ee" />
         <DrawPath d={toPath(mortCurve(5))} color="#818cf8" dashed delay={0.4} />

@@ -1,9 +1,9 @@
 import SectionHeader from './SectionHeader'
 
 const EMAIL = 'migue.vilchis@ciencias.unam.mx'
-const PHONE_DISPLAY = '+1 (914) 707-0185'
-const PHONE_TEL = '+19147070185'
-const WHATSAPP_URL = 'https://wa.me/19147070185'
+const PHONE_DISPLAY = '+1 (913) 707-0185'
+const PHONE_TEL = '+19137070185'
+const WHATSAPP_URL = 'https://wa.me/19137070185'
 const LINKEDIN_HANDLE = 'deadmigue'
 const GITHUB_HANDLE = 'deadmigue55'
 
