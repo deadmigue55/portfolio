@@ -1,7 +1,7 @@
 # What makes a portfolio stand out: research and audit
 
 Research done 2026-10-21/22 for the v2 rebuild of this site. Three parts: what the evidence says,
-how the site scored before the rebuild, and what each finding changed. The last part is the backlog.
+how the site scored before the rebuild, what each finding changed, and the measured result. The last part is the backlog.
 
 ## 1. What the evidence says
 
@@ -70,7 +70,27 @@ Measured on https://deadmigue.vercel.app/ on 2026-10-22 with a real browser (Pla
 | Reach | English and Spanish with a visible switch, remembered between visits. |
 | Power users | `Ctrl/⌘ K` command palette: jump to a section, open a project, copy the email, switch theme or language. |
 
-## 4. Backlog (not done yet)
+## 4. Result
+
+Measured on the live site, same browser and script as the baseline in part 2.
+
+| | Before | After |
+|---|---|---|
+| Desktop LCP (limit 2.5 s) | 4.7 s | **2.0 s** |
+| Mobile LCP | 2.0 s | 2.0 s |
+| Layout shift (limit 0.1) | 0.005 | 0.005 (desktop), 0 (mobile) |
+| Console errors | 0 | 0 |
+| Skip link, language switch, pause control | none | yes |
+| axe-core WCAG 2.2 A/AA violations | 14 contrast issues (light), 8 (dark) | 0 in both themes |
+| Horizontal overflow at 360 px | 5 px | none from 360 to 1920 px |
+| Automated end-to-end checks | none | 48 (`scripts/qa/qa.py`) |
+| Gzipped JavaScript | 147 KB | 164 KB (explorer, command menu, two languages) |
+
+Two real bugs were caught by looking at screenshots and by new checks rather than by the first QA run: section titles
+that never appeared (a clipped element is never "in view") and extra words in a longer Spanish title staying hidden
+after a language switch. Both now have checks.
+
+## 5. Backlog (not done yet)
 
 Ordered by expected value. See the end of the rebuild notes for details.
 
