@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SectionHeader from './SectionHeader'
+import Magnetic from './Magnetic'
 import { CreditPreview, MortalityPreview, ClaimsPreview } from './Previews'
 
 const MORTALITY_REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
@@ -100,7 +101,7 @@ function Chip({ children }) {
 function Details({ p, wide, onClose }) {
   const d = p.details
   return (
-    <div className={`h-full overflow-y-auto rounded-xl bg-bg/95 backdrop-blur-md p-5 ${wide ? 'lg:p-8' : ''}`}>
+    <div className={`h-full overflow-y-auto rounded-xl bg-bg p-5 ${wide ? 'lg:p-8' : ''}`}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <p className="neon-eyebrow text-[11px] font-medium tracking-widest uppercase">Quick view</p>
@@ -172,8 +173,8 @@ function ProjectCard({ p }) {
 
   return (
     <article tabIndex={0} onClick={onCardClick} aria-label={`${p.title}: details on hover or focus`}
-      className={`neon-ring group relative rounded-xl border border-line bg-card backdrop-blur-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
-        wide ? 'md:col-span-2 grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 flex flex-col'}`}>
+      className={`neon-ring group relative rounded-xl border border-line bg-card outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+        wide ? 'md:col-span-2 grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 ease-out flex flex-col'}`}>
 
       {/* Animated preview: the part that stays */}
       <div className={wide ? 'p-5 lg:p-6' : 'p-6 pb-0'}>
@@ -199,12 +200,15 @@ function ProjectCard({ p }) {
           ? (
             <div className="flex flex-wrap gap-3 mt-6">
               {p.links.map(l => (
-                <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer"
-                  className={l.primary
-                    ? 'px-4 py-2 rounded-lg text-sm font-medium text-on-accent bg-accent hover:brightness-110 transition-colors'
-                    : 'px-4 py-2 rounded-lg text-sm font-medium text-fg border border-line hover:border-accent/60 hover:text-fg transition-colors'}>
-                  {l.label}{l.primary ? ' →' : ''}
-                </a>
+                <Magnetic key={l.href} strength={0.2} max={7}>
+                  <a href={l.href} target="_blank" rel="noopener noreferrer"
+                    className={`group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-[transform,filter,border-color,box-shadow] duration-200 active:scale-95 ${l.primary
+                      ? 'text-on-accent bg-accent hover:brightness-110 hover:shadow-[0_0_20px_var(--glow)]'
+                      : 'text-fg border border-line hover:border-accent/60'}`}>
+                    {l.label}
+                    {l.primary && <span aria-hidden="true" className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">→</span>}
+                  </a>
+                </Magnetic>
               ))}
             </div>
           )

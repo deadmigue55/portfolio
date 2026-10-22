@@ -16,10 +16,23 @@ function rng(seed) {
 const toPath = pts => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
 
 const inView = { amount: 0.4 }
-const loop = (delay = 0, duration = 1.6) => ({
-  duration, delay, ease: 'easeInOut',
-  repeat: Infinity, repeatType: 'reverse', repeatDelay: 2.4,
-})
+
+// Every preview runs the same calm loop: wait for its turn, ease in, hold, ease out, repeat.
+// The stagger is part of the keyframe times (not a one-off delay), so elements stay in step on every cycle.
+const CYCLE = 6.5   // seconds per loop
+const frames = (from, to) => [from, from, to, to, from]
+const OUT = [0.22, 1, 0.36, 1]      // fast start, soft landing
+const IN_OUT = [0.4, 0, 0.2, 1]
+const cycle = (stagger = 0, rise = 0.9, riseEase = OUT) => {
+  const s = stagger / CYCLE
+  const r = rise / CYCLE
+  return {
+    duration: CYCLE,
+    times: [0, s, s + r, 0.9, 1],
+    ease: ['linear', riseEase, 'linear', IN_OUT],
+    repeat: Infinity,
+  }
+}
 
 function Frame({ label, children, className = '', height = 'h-28' }) {
   return (
@@ -34,19 +47,24 @@ function Frame({ label, children, className = '', height = 'h-28' }) {
   )
 }
 
-// SVG line that draws itself (stretches to fill the frame)
+// SVG line that draws itself (stretches to fill the frame). The glow is a wider, faint copy of
+// the line: a filter that re-renders on every frame of the draw would stutter.
 function DrawPath({ d, color = 'var(--accent)', width = 2, delay = 0, dashed = false, glow = true }) {
+  const common = {
+    d, fill: 'none', stroke: color, strokeLinecap: 'round',
+    strokeDasharray: dashed ? '4 4' : undefined, vectorEffect: 'non-scaling-stroke',
+    initial: { pathLength: 0, opacity: 0 }, viewport: inView,
+  }
+  const t = cycle(delay, 1.6, [0.45, 0, 0.2, 1])
   return (
-    <motion.path
-      d={d} fill="none" stroke={color} strokeWidth={width} strokeLinecap="round"
-      strokeDasharray={dashed ? '4 4' : undefined}
-      vectorEffect="non-scaling-stroke"
-      style={glow ? { filter: 'drop-shadow(0 0 4px var(--glow))' } : undefined}
-      initial={{ pathLength: 0, opacity: 0 }}
-      whileInView={{ pathLength: 1, opacity: 1 }}
-      viewport={inView}
-      transition={loop(delay)}
-    />
+    <>
+      {glow && (
+        <motion.path {...common} strokeWidth={width * 4}
+          whileInView={{ pathLength: frames(0, 1), opacity: frames(0, 0.16) }} transition={t} />
+      )}
+      <motion.path {...common} strokeWidth={width}
+        whileInView={{ pathLength: frames(0, 1), opacity: frames(0, 1) }} transition={t} />
+    </>
   )
 }
 
@@ -80,8 +98,8 @@ export function StatsPreview() {
       <div className="absolute inset-x-0 bottom-[5%] top-0 flex items-end gap-[2px] px-[1px]">
         {bellBars.map((h, i) => (
           <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/25 border-t border-accent/60"
-            initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={inView}
-            transition={loop(i * 0.04, 0.9)} />
+            initial={{ height: '0%' }} whileInView={{ height: frames('0%', `${h}%`) }} viewport={inView}
+            transition={cycle(i * 0.04, 0.9)} />
         ))}
       </div>
       <Svg><DrawPath d={toPath(bellPts)} delay={0.3} /></Svg>
@@ -106,8 +124,8 @@ export function ActuarialPreview() {
                   ? 'rounded-[2px] bg-accent/35 border border-accent/40'
                   : 'rounded-[2px] border border-dashed border-accent/80 bg-accent/10 shadow-[0_0_6px_var(--glow)]'}
                 initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }} viewport={inView}
-                transition={loop(known ? (i + j) * 0.07 : 0.6 + (i + j - N) * 0.09, 0.45)} />
+                whileInView={{ opacity: frames(0, 1), scale: frames(0.5, 1) }} viewport={inView}
+                transition={cycle(known ? (i + j) * 0.07 : 0.6 + (i + j - N) * 0.09, 0.45)} />
             )
           })}
         </div>
@@ -167,8 +185,8 @@ export function ToolsPreview() {
         {termLines.map((l, i) => (
           <motion.p key={i} className={`whitespace-nowrap ${l.c}`}
             initial={{ clipPath: 'inset(0 100% 0 0)' }}
-            whileInView={{ clipPath: 'inset(0 0% 0 0)' }} viewport={inView}
-            transition={{ ...loop(i * 0.55, 0.6), ease: 'linear' }}>
+            whileInView={{ clipPath: frames('inset(0 100% 0 0)', 'inset(0 0% 0 0)') }} viewport={inView}
+            transition={cycle(i * 0.55, 0.6, 'linear')}>
             {l.t}
           </motion.p>
         ))}
@@ -202,8 +220,8 @@ export function CreditPreview() {
         <motion.span key={i}
           className={`absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full ${d.def ? 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.9)]' : 'bg-accent shadow-[0_0_6px_var(--glow)]'}`}
           style={{ left: `${d.left}%`, top: `${d.top}%` }}
-          initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: 1, scale: 1 }} viewport={inView}
-          transition={loop(i * 0.04, 0.4)} />
+          initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: frames(0, 1), scale: frames(0, 1) }} viewport={inView}
+          transition={cycle(i * 0.04, 0.4)} />
       ))}
       <Svg><DrawPath d={toPath(sigmoidPts)} delay={0.6} /></Svg>
     </Frame>
@@ -245,8 +263,8 @@ export function ClaimsPreview() {
         <div className="flex flex-col gap-1.5 w-[28%]">
           {['Loss ratio', 'Reserves', 'Claims'].map((k, i) => (
             <motion.div key={k} className="flex-1 rounded border border-line bg-subtle px-1.5 py-1"
-              initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={inView}
-              transition={loop(i * 0.12, 0.5)}>
+              initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: frames(0, 1), x: frames(-8, 0) }} viewport={inView}
+              transition={cycle(i * 0.12, 0.5)}>
               <p className="text-[8px] text-faint leading-none">{k}</p>
               <div className="mt-1 h-1.5 w-3/4 rounded-full bg-gradient-to-r from-accent/70 to-accent-2/30" />
             </motion.div>
@@ -256,8 +274,8 @@ export function ClaimsPreview() {
           <div className="absolute inset-0 flex items-end gap-[3px]">
             {claimBars.map((h, i) => (
               <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/30 border-t border-accent/70"
-                initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={inView}
-                transition={loop(0.2 + i * 0.05, 0.7)} />
+                initial={{ height: '0%' }} whileInView={{ height: frames('0%', `${h}%`) }} viewport={inView}
+                transition={cycle(0.2 + i * 0.05, 0.7)} />
             ))}
           </div>
           <Svg><DrawPath d={lossRatio} color="var(--accent)" delay={0.8} /></Svg>

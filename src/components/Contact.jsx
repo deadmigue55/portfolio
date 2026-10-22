@@ -1,4 +1,6 @@
 import SectionHeader from './SectionHeader'
+import Magnetic from './Magnetic'
+import CopyButton from './CopyButton'
 
 const EMAIL = 'migue.vilchis@ciencias.unam.mx'
 const PHONE_DISPLAY = '+1 (913) 707-0185'
@@ -149,7 +151,7 @@ function GitHubPreview() {
 }
 
 /* ── Card shell ── */
-const cardClass = 'neon-ring group flex flex-col rounded-2xl border border-line bg-card backdrop-blur-sm transition-all duration-300 hover:-translate-y-1'
+const cardClass = 'neon-ring group flex flex-col rounded-2xl border border-line bg-card transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1'
 
 function CardBody({ icon, label, value, note, external }) {
   return (
@@ -182,6 +184,27 @@ function LinkCard({ href, preview, ...body }) {
   )
 }
 
+const actionBase = 'group/btn inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-[transform,background-color,box-shadow,border-color] duration-200 active:scale-95 hover:shadow-[0_0_18px_var(--glow)]'
+const iconNudge = 'transition-transform duration-200 group-hover/btn:-rotate-12 group-hover/btn:scale-110'
+
+function EmailCard() {
+  return (
+    <div className={cardClass}>
+      <EmailPreview />
+      <CardBody icon={Icon.email} label="Email" value={EMAIL} />
+      <div className="mt-auto flex flex-wrap gap-3 px-5 pb-5 pt-1">
+        <Magnetic className="flex-1" strength={0.2}>
+          <a href={`mailto:${EMAIL}`}
+            className={`${actionBase} w-full border-accent/30 bg-accent/10 text-fg hover:bg-accent/20`}>
+            <span className={iconNudge}>{Icon.email}</span> Write an email
+          </a>
+        </Magnetic>
+        <CopyButton text={EMAIL} doneMessage="Email address copied" label="Copy" />
+      </div>
+    </div>
+  )
+}
+
 function PhoneCard() {
   return (
     <div className={cardClass}>
@@ -192,15 +215,20 @@ function PhoneCard() {
         value={PHONE_DISPLAY}
         note="Available for phone calls or WhatsApp"
       />
-      <div className="flex gap-3 px-5 pb-5 -mt-1">
-        <a href={`tel:${PHONE_TEL}`}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-2.5 text-sm font-medium text-fg hover:bg-accent/20 hover:shadow-[0_0_18px_var(--glow)] transition-all">
-          {Icon.phone} Call
-        </a>
-        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-good/30 bg-good/10 px-4 py-2.5 text-sm font-medium text-good hover:bg-good/20 hover:shadow-[0_0_18px_var(--glow)] transition-all">
-          {Icon.chat} WhatsApp
-        </a>
+      <div className="mt-auto flex flex-wrap gap-3 px-5 pb-5 pt-1">
+        <Magnetic className="flex-1" strength={0.2}>
+          <a href={`tel:${PHONE_TEL}`}
+            className={`${actionBase} w-full border-accent/30 bg-accent/10 text-fg hover:bg-accent/20`}>
+            <span className={iconNudge}>{Icon.phone}</span> Call
+          </a>
+        </Magnetic>
+        <Magnetic className="flex-1" strength={0.2}>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+            className={`${actionBase} w-full border-good/30 bg-good/10 text-good hover:bg-good/20`}>
+            <span className={iconNudge}>{Icon.chat}</span> WhatsApp
+          </a>
+        </Magnetic>
+        <CopyButton text={PHONE_DISPLAY} doneMessage="Phone number copied" label="Copy number" className="basis-full" />
       </div>
     </div>
   )
@@ -217,8 +245,7 @@ export default function Contact() {
         </SectionHeader>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <LinkCard href={`mailto:${EMAIL}`} preview={<EmailPreview />}
-            icon={Icon.email} label="Email" value={EMAIL} />
+          <EmailCard />
           <PhoneCard />
           <LinkCard href={`https://www.linkedin.com/in/${LINKEDIN_HANDLE}`} preview={<LinkedInPreview />}
             icon={Icon.linkedin} label="LinkedIn" value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />

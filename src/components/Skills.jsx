@@ -91,7 +91,7 @@ function NeonCard({ cat }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden p-6 rounded-xl border border-line bg-card backdrop-blur-sm transition-all duration-300"
+      className="relative overflow-hidden p-6 rounded-xl border border-line bg-card transition-[border-color,box-shadow] duration-300"
       style={{
         borderColor: hovered ? 'color-mix(in srgb, var(--accent) 45%, transparent)' : undefined,
         boxShadow: hovered ? '0 0 30px var(--glow-soft), inset 0 0 30px var(--glow-soft)' : undefined,

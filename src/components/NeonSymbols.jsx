@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 // Floating neon math/actuarial symbols, fixed behind the whole page.
 // tone: blue shade · drift: movement path · dur: drift time
@@ -18,25 +18,35 @@ const symbols = [
   { s: '∇',      tone: 'sky',      drift: 'b', top: '48%', left: '50%', size: '3rem',   dur: '28s', flash: '14s', fd: '-11s', desk: true },
   { s: 'α',      tone: 'cobalt',   drift: 'c', top: '15%', left: '40%', size: '2.2rem', dur: '15s', flash: '10.5s',fd: '-1.5s', desk: true },
   { s: 'β',      tone: 'electric', drift: 'a', top: '90%', left: '35%', size: '2.4rem', dur: '22s', flash: '9s',  fd: '-6.5s' },
-  { s: 'π',      tone: 'sky',      drift: 'b', top: '75%', left: '25%', size: '2rem',   dur: '16s', flash: '13.5s',fd: '-12s', desk: true },
-  { s: 'Var(X)', tone: 'cobalt',   drift: 'c', top: '5%',  left: '55%', size: '1.3rem', dur: '20s', flash: '11s', fd: '-3.5s', desk: true },
+  { s: 'π',      tone: 'sky',      drift: 'b', top: '80%', left: '40%', size: '2rem',   dur: '16s', flash: '13.5s',fd: '-12s', desk: true },
+  { s: 'Var(X)', tone: 'cobalt',   drift: 'c', top: '12%', left: '52%', size: '1.3rem', dur: '20s', flash: '11s', fd: '-3.5s', desk: true },
   { s: 'ρ',      tone: 'electric', drift: 'a', top: '35%', left: '70%', size: '2.6rem', dur: '18s', flash: '10s', fd: '-8.5s', desk: true },
 ]
 
 // Dims the glow, fades out the flashes and shrinks the movement as you scroll,
 // so the hero is flashy and the rest of the page stays calm.
-function useScrollFade() {
+function useScrollFade(ref) {
   useEffect(() => {
-    const root = document.documentElement
+    // The variables live on the background element only. Setting them on <html> made the
+    // browser recalculate the style of the whole page on every scroll frame.
+    const el = ref.current
+    if (!el) return undefined
     let raf = 0
+    let last = ''
 
     const update = () => {
       raf = 0
       const screens = window.scrollY / window.innerHeight
-      const e = Math.exp(-screens / 1.2)           // 1 at top → ~0 far down
-      root.style.setProperty('--bg-glow', (0.15 + 0.85 * e).toFixed(3))
-      root.style.setProperty('--bg-flash', Math.pow(e, 1.5).toFixed(3))
-      root.style.setProperty('--bg-amp', (0.3 + 0.7 * e).toFixed(3))
+      const e = Math.exp(-screens / 1.2)           // 1 at the top → ~0 far down
+      const glow = (0.15 + 0.85 * e).toFixed(2)
+      const flash = Math.pow(e, 1.5).toFixed(2)
+      const amp = (0.3 + 0.7 * e).toFixed(2)
+      const key = `${glow}|${flash}|${amp}`
+      if (key === last) return                     // nothing visible changed: skip the write
+      last = key
+      el.style.setProperty('--bg-glow', glow)
+      el.style.setProperty('--bg-flash', flash)
+      el.style.setProperty('--bg-amp', amp)
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
 
@@ -48,14 +58,15 @@ function useScrollFade() {
       window.removeEventListener('resize', onScroll)
       cancelAnimationFrame(raf)
     }
-  }, [])
+  }, [ref])
 }
 
 export default function NeonSymbols() {
-  useScrollFade()
+  const ref = useRef(null)
+  useScrollFade(ref)
 
   return (
-    <div className="neon-bg" aria-hidden="true">
+    <div ref={ref} className="neon-bg" aria-hidden="true">
       <div className="ns-ambient ns-ambient-1" />
       <div className="ns-ambient ns-ambient-2" />
 

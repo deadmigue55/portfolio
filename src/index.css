@@ -110,7 +110,8 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
-* { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
   font-family: var(--font-sans);
@@ -145,6 +146,8 @@ h1, h2, h3 {
   pointer-events: none;
   user-select: none;
   opacity: calc(var(--bg-glow, 1) * var(--sym-opacity, 1));
+  contain: layout paint style;   /* its repaints never touch the page */
+  will-change: opacity;
 }
 
 /* Symbol tones */
@@ -186,9 +189,8 @@ h1, h2, h3 {
   display: block;
   color: var(--core);
   text-shadow:
-    0 0 8px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
-    0 0 20px color-mix(in srgb, var(--c) var(--sym-glow), transparent),
-    0 0 44px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
+    0 0 10px color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 32px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
 }
 
 /* Steady layer: slow breathing */
@@ -211,10 +213,8 @@ h1, h2, h3 {
 .ns-flash {
   color: var(--core);
   text-shadow:
-    0 0 12px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
-    0 0 30px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
-    0 0 70px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
-    0 0 120px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
+    0 0 14px color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 48px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
   opacity: 0;
   animation: ns-flicker var(--flash, 10s) linear var(--fd, 0s) infinite;
   will-change: opacity;
@@ -233,8 +233,7 @@ h1, h2, h3 {
 /* Soft light pools that slowly breathe */
 .ns-ambient {
   position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
+  border-radius: 9999px;   /* the gradient is already soft: no blur filter needed */
   will-change: opacity, transform;
 }
 .ns-ambient-1 {
@@ -340,8 +339,7 @@ h1, h2, h3 {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 18px var(--glow-soft));
-  animation: neon-slide 10s linear infinite;
+  animation: neon-slide 14s linear infinite;
 }
 
 /* Nav links light up on hover */
@@ -371,4 +369,23 @@ h1, h2, h3 {
 @media (prefers-reduced-motion: reduce) {
   .neon-bar, .neon-ring::before, .neon-ring::after,
   .neon-dot, .neon-name, .caret { animation: none !important; }
+}
+
+/* Press ripple on buttons (NeonButton.jsx): a ring that grows from the click point */
+.btn-ripple {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  margin: -80px 0 0 -80px;
+  border-radius: 9999px;
+  opacity: 0.55;
+  pointer-events: none;
+  transform: scale(0);
+  animation: btn-ripple 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes btn-ripple {
+  to { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-ripple { animation: none; opacity: 0; }
 }
