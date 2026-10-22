@@ -11,7 +11,8 @@ const commit = (() => {
 })()
 
 // The fonts above the fold are fetched in parallel with the CSS instead of after it
-const CRITICAL_FONTS = [/bricolage-grotesque-latin-opsz-normal/, /ibm-plex-sans-latin-400-normal/, /instrument-serif-latin-400-italic/]
+// Only the woff2 files: the legacy woff copies are bundled as a fallback and must not be fetched as well
+const CRITICAL_FONTS = [/bricolage-grotesque-latin-opsz-normal.*\.woff2$/, /ibm-plex-sans-latin-400-normal.*\.woff2$/, /instrument-serif-latin-400-italic.*\.woff2$/]
 function preloadCriticalFonts() {
   return {
     name: 'preload-critical-fonts',
