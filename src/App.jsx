@@ -7,6 +7,7 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import NeonSymbols from './components/NeonSymbols'
 import Toaster from './components/Toast'
+import { CircuitDivider } from './components/Electric'
 import { MotionConfig } from 'motion/react'
 
 export default function App() {
@@ -20,9 +21,13 @@ export default function App() {
       <Toaster />
       <main className="relative z-10">
         <Hero />
+        <CircuitDivider />
         <About />
+        <CircuitDivider late />
         <Skills />
+        <CircuitDivider />
         <Projects />
+        <CircuitDivider late />
         <Contact />
       </main>
       <div className="relative z-10">

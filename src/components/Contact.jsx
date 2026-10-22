@@ -1,5 +1,6 @@
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
+import Reveal from './Reveal'
 import CopyButton from './CopyButton'
 
 const EMAIL = 'migue.vilchis@ciencias.unam.mx'
@@ -151,7 +152,7 @@ function GitHubPreview() {
 }
 
 /* ── Card shell ── */
-const cardClass = 'neon-ring group flex flex-col rounded-2xl border border-line bg-card transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1'
+const cardClass = 'neon-ring group flex h-full flex-col rounded-2xl border border-line bg-card transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1'
 
 function CardBody({ icon, label, value, note, external }) {
   return (
@@ -245,12 +246,16 @@ export default function Contact() {
         </SectionHeader>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <EmailCard />
-          <PhoneCard />
-          <LinkCard href={`https://www.linkedin.com/in/${LINKEDIN_HANDLE}`} preview={<LinkedInPreview />}
-            icon={Icon.linkedin} label="LinkedIn" value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />
-          <LinkCard href={`https://github.com/${GITHUB_HANDLE}`} preview={<GitHubPreview />}
-            icon={Icon.github} label="GitHub" value={`github.com/${GITHUB_HANDLE}`} />
+          <Reveal className="h-full"><EmailCard /></Reveal>
+          <Reveal delay={0.12} className="h-full"><PhoneCard /></Reveal>
+          <Reveal className="h-full">
+            <LinkCard href={`https://www.linkedin.com/in/${LINKEDIN_HANDLE}`} preview={<LinkedInPreview />}
+              icon={Icon.linkedin} label="LinkedIn" value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />
+          </Reveal>
+          <Reveal delay={0.12} className="h-full">
+            <LinkCard href={`https://github.com/${GITHUB_HANDLE}`} preview={<GitHubPreview />}
+              icon={Icon.github} label="GitHub" value={`github.com/${GITHUB_HANDLE}`} />
+          </Reveal>
         </div>
       </div>
     </section>

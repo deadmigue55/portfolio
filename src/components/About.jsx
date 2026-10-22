@@ -1,4 +1,6 @@
 import SectionHeader from './SectionHeader'
+import Reveal from './Reveal'
+import { CircuitLine } from './Electric'
 
 const timeline = [
   {
@@ -52,10 +54,10 @@ export default function About() {
           {/* Right: timeline */}
           <div className="space-y-6">
             {timeline.map((item, i) => (
-              <div key={item.title} className="flex gap-4">
+              <Reveal key={item.title} delay={0.1 + i * 0.15} className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div className="neon-dot w-2 h-2 rounded-full mt-1.5 shrink-0"></div>
-                  {i < timeline.length - 1 && <div className="w-px flex-1 bg-gradient-to-b from-accent/40 to-line mt-2"></div>}
+                  {i < timeline.length - 1 && <CircuitLine className="mt-2 flex-1" />}
                 </div>
                 <div className="pb-6">
                   <span className="text-xs text-accent font-medium">{item.year}</span>
@@ -63,7 +65,7 @@ export default function About() {
                   <p className="text-faint text-sm">{item.org}</p>
                   <p className="text-muted text-sm mt-2 leading-relaxed">{item.desc}</p>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import NeonButton from './NeonButton'
+import Reveal from './Reveal'
 import SectionHeader from './SectionHeader'
 import { StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview } from './Previews'
 
@@ -135,8 +136,10 @@ export default function Skills() {
         </SectionHeader>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {categories.map(cat => (
-            <NeonCard key={cat.label} cat={cat} />
+          {categories.map((cat, i) => (
+            <Reveal key={cat.label} delay={(i % 2) * 0.12} className="h-full">
+              <NeonCard cat={cat} />
+            </Reveal>
           ))}
         </div>
 

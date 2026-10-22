@@ -10,16 +10,12 @@ const symbols = [
   { s: 'μ',      tone: 'cobalt',   drift: 'c', top: '55%', left: '3%',  size: '3rem',   dur: '14s', flash: '8s',  fd: '-3s'  },
   { s: '∫',      tone: 'electric', drift: 'a', top: '70%', left: '90%', size: '3.8rem', dur: '18s', flash: '12s', fd: '-9s'  },
   { s: 'λ',      tone: 'sky',      drift: 'c', top: '40%', left: '93%', size: '2.5rem', dur: '22s', flash: '10s', fd: '-2s'  },
-  { s: 'P(A|B)', tone: 'cobalt',   drift: 'b', top: '80%', left: '8%',  size: '1.4rem', dur: '26s', flash: '13s', fd: '-7s',  desk: true },
-  { s: 'χ²',     tone: 'electric', drift: 'b', top: '8%',  left: '75%', size: '2.6rem', dur: '17s', flash: '9.5s',fd: '-5s'  },
   { s: 'E[X]',   tone: 'sky',      drift: 'a', top: '85%', left: '60%', size: '1.5rem', dur: '20s', flash: '11.5s',fd: '-10s', desk: true },
   { s: '∂',      tone: 'cobalt',   drift: 'c', top: '30%', left: '8%',  size: '2.8rem', dur: '24s', flash: '8.5s',fd: '-4s'  },
   { s: 'Φ(z)',   tone: 'electric', drift: 'a', top: '62%', left: '78%', size: '1.6rem', dur: '19s', flash: '12.5s',fd: '-8s', desk: true },
   { s: '∇',      tone: 'sky',      drift: 'b', top: '48%', left: '50%', size: '3rem',   dur: '28s', flash: '14s', fd: '-11s', desk: true },
-  { s: 'α',      tone: 'cobalt',   drift: 'c', top: '15%', left: '40%', size: '2.2rem', dur: '15s', flash: '10.5s',fd: '-1.5s', desk: true },
   { s: 'β',      tone: 'electric', drift: 'a', top: '90%', left: '35%', size: '2.4rem', dur: '22s', flash: '9s',  fd: '-6.5s' },
   { s: 'π',      tone: 'sky',      drift: 'b', top: '80%', left: '40%', size: '2rem',   dur: '16s', flash: '13.5s',fd: '-12s', desk: true },
-  { s: 'Var(X)', tone: 'cobalt',   drift: 'c', top: '12%', left: '52%', size: '1.3rem', dur: '20s', flash: '11s', fd: '-3.5s', desk: true },
   { s: 'ρ',      tone: 'electric', drift: 'a', top: '35%', left: '70%', size: '2.6rem', dur: '18s', flash: '10s', fd: '-8.5s', desk: true },
 ]
 

@@ -1,6 +1,11 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import NeonButton from './NeonButton'
+import HeroScene from './HeroScene'
+import Reveal from './Reveal'
+import { BeamBorder } from './Electric'
+
+const rise = { duration: 1, ease: [0.22, 1, 0.36, 1] }
 
 // Scroll cue: a mouse outline with a dot that slides down, and a label in the site's two voices
 // (mono for the instruction, the serif italic of the surname for the invitation).
@@ -63,27 +68,42 @@ export default function Hero() {
         }} />
       </div>
 
-      <div className="max-w-5xl mx-auto w-full relative z-10">
+      <div className="relative z-10 mx-auto grid w-full max-w-5xl items-center gap-12 py-10 lg:grid-cols-[1.02fr_1fr] lg:gap-10">
+      <div>
 
         {/* Status badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-medium mb-8 shadow-[0_0_18px_var(--glow)]">
-          <span className="neon-dot w-1.5 h-1.5 rounded-full"></span>
-          Open to new opportunities · Mexico City / Remote
-        </div>
+        <Reveal y={10} blur={4} className="mb-8">
+          <div className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-medium">
+            <BeamBorder slow />
+            <span className="neon-dot w-1.5 h-1.5 rounded-full"></span>
+            Open to new opportunities · Mexico City / Remote
+          </div>
+        </Reveal>
 
         {/* Main heading */}
-        <h1 className="text-5xl md:text-7xl font-bold text-fg leading-tight mb-6 [text-shadow:0_0_30px_var(--glow-soft)]">
-          Miguel<br />
-          <span className="neon-name italic font-normal" style={{ fontFamily: 'Instrument Serif, serif' }}>
-            Vilchis
+        <h1 className="text-5xl md:text-7xl font-bold text-fg leading-[1.02] mb-6 [text-shadow:0_0_30px_var(--glow-soft)]">
+          {/* Each line slides up through a mask, the way Framer sets its headlines */}
+          <span className="block overflow-hidden pb-1">
+            <motion.span className="block" initial={{ y: '115%' }} animate={{ y: 0 }} transition={{ ...rise, delay: 0.15 }}>
+              Miguel
+            </motion.span>
+          </span>
+          <span className="block overflow-hidden pb-3 pr-4">
+            <motion.span className="neon-name spark-flicker block italic font-normal" style={{ fontFamily: 'Instrument Serif, serif' }}
+              initial={{ y: '115%' }} animate={{ y: 0 }} transition={{ ...rise, delay: 0.3 }}>
+              Vilchis
+            </motion.span>
           </span>
         </h1>
 
         {/* Tagline */}
+        <Reveal delay={0.45} y={14}>
         <p className="text-xl md:text-2xl text-soft font-light mb-4 max-w-2xl">
           Actuary · Pricing &amp; Risk · Data &amp; AI
         </p>
+        </Reveal>
 
+        <Reveal delay={0.55} y={14}>
         <p className="text-muted max-w-xl leading-relaxed mb-10">
           Actuarial Science graduate from{' '}
           <span className="text-fg">Facultad de Ciencias, UNAM</span>, working in pricing and
@@ -91,8 +111,10 @@ export default function Hero() {
           reinsurers. I build tools that combine probability theory, machine learning and AI to
           price, model and explain risk.
         </p>
+        </Reveal>
 
         {/* LED Neon CTAs */}
+        <Reveal delay={0.7} y={14}>
         <div className="flex flex-wrap gap-4">
           <NeonButton href="#projects" variant="primary" arrow>
             View Projects
@@ -101,8 +123,12 @@ export default function Hero() {
             Get in Touch
           </NeonButton>
         </div>
+        </Reveal>
 
         <ScrollCue />
+      </div>
+
+      <HeroScene />
       </div>
     </section>
   )

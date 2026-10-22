@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
+import Reveal from './Reveal'
+import { BeamBorder } from './Electric'
 import { CreditPreview, MortalityPreview, ClaimsPreview } from './Previews'
 
 const MORTALITY_REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
@@ -174,7 +176,9 @@ function ProjectCard({ p }) {
   return (
     <article tabIndex={0} onClick={onCardClick} aria-label={`${p.title}: details on hover or focus`}
       className={`neon-ring group relative rounded-xl border border-line bg-card outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
-        wide ? 'md:col-span-2 grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 ease-out flex flex-col'}`}>
+        wide ? 'grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 ease-out flex flex-col'}`}>
+
+      {wide && <BeamBorder />}
 
       {/* Animated preview: the part that stays */}
       <div className={wide ? 'p-5 lg:p-6' : 'p-6 pb-0'}>
@@ -239,7 +243,11 @@ export default function Projects() {
         </SectionHeader>
 
         <div className="grid md:grid-cols-2 gap-5">
-          {projects.map(p => <ProjectCard key={p.title} p={p} />)}
+          {projects.map((p, i) => (
+            <Reveal key={p.title} delay={i * 0.12} className={p.featured ? 'md:col-span-2' : 'h-full'}>
+              <ProjectCard p={p} />
+            </Reveal>
+          ))}
         </div>
 
         <p className="text-faint text-sm mt-8">
