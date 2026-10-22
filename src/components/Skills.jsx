@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
 import NeonButton from './NeonButton'
 import Reveal from './Reveal'
+import { SpotLayer } from './Electric'
 import SectionHeader from './SectionHeader'
 import { StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview } from './Previews'
 
@@ -75,38 +75,11 @@ const colorMap = {
 }
 
 function NeonCard({ cat }) {
-  const ref = useRef(null)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
-  const [hovered, setHovered] = useState(false)
   const c = colorMap[cat.color]
 
-  const handleMouseMove = (e) => {
-    if (!ref.current) return
-    const rect = ref.current.getBoundingClientRect()
-    setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-  }
-
   return (
-    <div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden p-6 rounded-xl border border-line bg-card transition-[border-color,box-shadow] duration-300"
-      style={{
-        borderColor: hovered ? 'color-mix(in srgb, var(--accent) 45%, transparent)' : undefined,
-        boxShadow: hovered ? '0 0 30px var(--glow-soft), inset 0 0 30px var(--glow-soft)' : undefined,
-      }}
-    >
-      {/* Mouse-following inner glow */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none rounded-xl transition-opacity duration-150"
-        style={{
-          opacity: hovered ? 1 : 0,
-          background: `radial-gradient(circle 140px at ${pos.x}px ${pos.y}px, var(--glow-soft) 0%, transparent 70%)`,
-        }}
-      />
+    <div className="spot-card relative h-full overflow-hidden p-6 rounded-xl border border-line bg-card">
+      <SpotLayer />
 
       <div className="relative z-10 mb-5">
         <cat.Preview />
@@ -144,7 +117,8 @@ export default function Skills() {
         </div>
 
         {/* Certs / learning callout */}
-        <div className="neon-ring mt-10 p-5 rounded-xl border border-line bg-card flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="spot-card relative mt-10 p-5 rounded-xl border border-line bg-card flex flex-col md:flex-row items-start md:items-center gap-4">
+          <SpotLayer />
           <div className="flex-1">
             <p className="text-fg font-medium">Currently leveling up</p>
             <p className="text-muted text-sm mt-1">

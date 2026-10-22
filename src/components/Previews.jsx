@@ -1,6 +1,10 @@
-// Small animated previews for Skills and Projects cards.
-// They animate when scrolled into view and loop while visible.
-import { motion } from 'motion/react'
+// Small blueprint-style previews for the Skills and Projects cards.
+//
+// Each one is complete at rest. Just before it scrolls into view it is armed (hidden), then it
+// builds once: outlines draw first, shapes fill in, a spark or sweep keeps moving afterwards.
+// Leaving the screen re-arms it, so it builds again on the way back. The animation itself lives in
+// CSS (index.css, `.pv-*`); this file only decides what to draw and when each piece starts.
+import { useLayoutEffect, useRef, useState } from 'react'
 
 /* ── Helpers ── */
 
@@ -13,33 +17,52 @@ function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
-const toPath = pts => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+const line = pts => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
 
-const inView = { amount: 0.4 }
-
-// Every preview runs the same calm loop: wait for its turn, ease in, hold, ease out, repeat.
-// The stagger is part of the keyframe times (not a one-off delay), so elements stay in step on every cycle.
-const CYCLE = 6.5   // seconds per loop
-const frames = (from, to) => [from, from, to, to, from]
-const OUT = [0.22, 1, 0.36, 1]      // fast start, soft landing
-const IN_OUT = [0.4, 0, 0.2, 1]
-const cycle = (stagger = 0, rise = 0.9, riseEase = OUT) => {
-  const s = stagger / CYCLE
-  const r = rise / CYCLE
-  return {
-    duration: CYCLE,
-    times: [0, s, s + r, 0.9, 1],
-    ease: ['linear', riseEase, 'linear', IN_OUT],
-    repeat: Infinity,
+// Catmull-Rom through the points, as cubic Bezier segments
+function smooth(pts) {
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6]
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6]
+    d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`
   }
+  return d
+}
+
+const d = seconds => ({ '--d': `${seconds}s` })
+
+// Armed before first paint (so it never flashes complete), played while on screen
+function usePlay() {
+  const ref = useRef(null)
+  const [state, setState] = useState('rest')
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    setState('armed')
+    const io = new IntersectionObserver(([e]) => setState(e.isIntersecting ? 'playing' : 'armed'), { threshold: 0.35 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return [ref, state === 'armed' ? 'is-armed' : state === 'playing' ? 'is-playing' : '']
+}
+
+// A bare box that plays its children's animations while on screen (the Contact cards use it too)
+export function PlayBox({ children, className = '' }) {
+  const [ref, state] = usePlay()
+  return <div ref={ref} aria-hidden="true" className={`pv ${state} ${className}`}>{children}</div>
 }
 
 function Frame({ label, children, className = '', height = 'h-28' }) {
+  const [ref, state] = usePlay()
   return (
-    <div className={`relative ${height} overflow-hidden rounded-lg border border-line bg-gradient-to-br from-card-2 to-card ${className}`} aria-hidden="true">
+    <div ref={ref} aria-hidden="true"
+      className={`pv ${state} relative ${height} overflow-hidden rounded-lg border border-line bg-gradient-to-br from-card-2 to-card ${className}`}>
+      <div className="dot-grid absolute inset-0 opacity-70" />
       {children}
       {label && (
-        <span className="absolute top-2 left-2 z-10 rounded bg-bg/70 px-1.5 py-0.5 font-mono text-[10px] text-accent">
+        <span className="absolute left-2 top-2 z-10 rounded bg-bg/70 px-1.5 py-0.5 font-mono text-[10px] text-accent">
           {label}
         </span>
       )}
@@ -47,149 +70,150 @@ function Frame({ label, children, className = '', height = 'h-28' }) {
   )
 }
 
-// SVG line that draws itself (stretches to fill the frame). The glow is a wider, faint copy of
-// the line: a filter that re-renders on every frame of the draw would stutter.
-function DrawPath({ d, color = 'var(--accent)', width = 2, delay = 0, dashed = false, glow = true }) {
-  const common = {
-    d, fill: 'none', stroke: color, strokeLinecap: 'round',
-    strokeDasharray: dashed ? '4 4' : undefined, vectorEffect: 'non-scaling-stroke',
-    initial: { pathLength: 0, opacity: 0 }, viewport: inView,
-  }
-  const t = cycle(delay, 1.6, [0.45, 0, 0.2, 1])
+function Svg({ vb = '0 0 400 100', children }) {
   return (
-    <>
-      {glow && (
-        <motion.path {...common} strokeWidth={width * 4}
-          whileInView={{ pathLength: frames(0, 1), opacity: frames(0, 0.16) }} transition={t} />
-      )}
-      <motion.path {...common} strokeWidth={width}
-        whileInView={{ pathLength: frames(0, 1), opacity: frames(0, 1) }} transition={t} />
-    </>
-  )
-}
-
-function Svg({ children }) {
-  return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+    <svg className="absolute inset-0 h-full w-full" viewBox={vb} preserveAspectRatio="xMidYMid meet">
       {children}
     </svg>
   )
 }
 
+// A line that draws itself (pathLength is normalised to 1 so the CSS needs no per-path numbers)
+function Draw({ path, stroke = 'var(--accent)', w = 2, delay = 0, time = 1.4, glow = false, ...rest }) {
+  return (
+    <>
+      {glow && <path d={path} pathLength="1" fill="none" stroke={stroke} strokeWidth={w * 4} opacity="0.14" strokeLinecap="round"
+        className="pv-draw" style={{ ...d(delay), '--t': `${time}s` }} />}
+      <path d={path} pathLength="1" fill="none" stroke={stroke} strokeWidth={w} strokeLinecap="round"
+        className="pv-draw" style={{ ...d(delay), '--t': `${time}s` }} {...rest} />
+    </>
+  )
+}
+
 /* ════════ Skills previews ════════ */
 
-// Probability & Statistics: histogram filling under a bell curve
-const bellPts = Array.from({ length: 61 }, (_, k) => {
-  const x = -3 + (6 * k) / 60
-  return [(k / 60) * 200, 76 - 60 * Math.exp(-(x * x) / 2)]
-})
+// Probability and statistics: a histogram rising under a bell curve, a sweep reading across it
+const BARS = 26
+const bell = x => Math.exp(-(x * x) / 2)
 const bellBars = (() => {
   const r = rng(7)
-  return Array.from({ length: 16 }, (_, i) => {
-    const x = -3 + (6 * (i + 0.5)) / 16
-    const h = 60 * Math.exp(-(x * x) / 2) * (0.82 + r() * 0.3)
-    return (h / 80) * 100
+  return Array.from({ length: BARS }, (_, i) => {
+    const x = -3 + (6 * (i + 0.5)) / BARS
+    return 66 * bell(x) * (0.82 + r() * 0.3)
   })
 })()
+const bellPath = line(Array.from({ length: 61 }, (_, k) => {
+  const x = -3 + (6 * k) / 60
+  return [30 + (k / 60) * 340, 88 - 66 * bell(x)]
+}))
 
 export function StatsPreview() {
   return (
     <Frame label="N(μ, σ²)">
-      <div className="absolute inset-x-0 bottom-[5%] top-0 flex items-end gap-[2px] px-[1px]">
-        {bellBars.map((h, i) => (
-          <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/25 border-t border-accent/60"
-            initial={{ height: '0%' }} whileInView={{ height: frames('0%', `${h}%`) }} viewport={inView}
-            transition={cycle(i * 0.04, 0.9)} />
-        ))}
-      </div>
-      <Svg><DrawPath d={toPath(bellPts)} delay={0.3} /></Svg>
-    </Frame>
-  )
-}
-
-// Actuarial Science: chain-ladder triangle, known cells then projected (IBNR) cells
-const N = 6
-const cells = Array.from({ length: N * N }, (_, k) => ({ i: Math.floor(k / N), j: k % N }))
-
-export function ActuarialPreview() {
-  return (
-    <Frame label="chain ladder · IBNR">
-      <div className="absolute inset-0 flex items-center justify-end gap-4 pl-4 pr-4 pt-6 pb-2">
-        <div className="grid grid-cols-6 gap-[3px] h-full aspect-square">
-          {cells.map(({ i, j }) => {
-            const known = i + j < N
-            return (
-              <motion.div key={`${i}-${j}`}
-                className={known
-                  ? 'rounded-[2px] bg-accent/35 border border-accent/40'
-                  : 'rounded-[2px] border border-dashed border-accent/80 bg-accent/10 shadow-[0_0_6px_var(--glow)]'}
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: frames(0, 1), scale: frames(0.5, 1) }} viewport={inView}
-                transition={cycle(known ? (i + j) * 0.07 : 0.6 + (i + j - N) * 0.09, 0.45)} />
-            )
-          })}
-        </div>
-        <div className="flex flex-col gap-1.5 text-[10px] text-muted">
-          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] bg-accent/50" /> paid</span>
-          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] border border-dashed border-accent" /> projected</span>
-        </div>
-      </div>
-    </Frame>
-  )
-}
-
-// Quant Finance & ML: Monte Carlo random-walk paths with a VaR line
-const walks = (() => {
-  const r = rng(42)
-  const normal = () => Math.sqrt(-2 * Math.log(r() + 1e-9)) * Math.cos(2 * Math.PI * r())
-  return Array.from({ length: 7 }, () => {
-    let y = 40
-    return toPath(Array.from({ length: 41 }, (_, s) => {
-      if (s) y = Math.min(76, Math.max(6, y + normal() * 3.2))
-      return [(s / 40) * 200, y]
-    }))
-  })
-})()
-const walkColors = ['var(--accent)', 'var(--accent-2)', 'var(--fg)', 'var(--accent)', 'var(--accent-2)', 'var(--soft)', 'var(--muted)']
-
-export function QuantPreview() {
-  return (
-    <Frame label="monte carlo · VaR₉₉">
       <Svg>
-        {walks.map((d, i) => (
-          <DrawPath key={i} d={d} color={walkColors[i]} width={1.4} delay={i * 0.12} glow={i < 3} />
+        {bellBars.map((h, i) => (
+          <rect key={i} x={30 + i * (340 / BARS) + 1} y={88 - h} width={340 / BARS - 2} height={h} rx="1.5"
+            className="pv-grow fill-accent/25 stroke-accent/50" strokeWidth="1" style={d(0.5 + i * 0.03)} />
         ))}
-        <DrawPath d="M0,68 L200,68" color="var(--fg)" width={1} dashed delay={1} glow={false} />
+        <Draw path="M20,88 H380" stroke="var(--soft)" w={1.2} time={0.9} />
+        <Draw path={bellPath} delay={0.9} time={1.5} glow />
+        <line x1="30" x2="30" y1="14" y2="88" stroke="var(--beam-core)" strokeWidth="1.5" className="pv-sweep" style={{ '--span': '340px' }} />
       </Svg>
     </Frame>
   )
 }
 
-// Data & Tools: terminal lines typing themselves out
-const termLines = [
+// Actuarial science: a development triangle. Paid cells land first, projected (IBNR) cells shimmer.
+const N = 6
+const CELL = 11, GAP = 3
+const cells = Array.from({ length: N * N }, (_, k) => ({ i: Math.floor(k / N), j: k % N }))
+
+export function ActuarialPreview() {
+  const x0 = 270, y0 = 12
+  return (
+    <Frame label="chain ladder · IBNR">
+      <Svg>
+        {cells.map(({ i, j }) => {
+          const known = i + j < N
+          const x = x0 + j * (CELL + GAP), y = y0 + i * (CELL + GAP)
+          return known ? (
+            <rect key={`${i}-${j}`} x={x} y={y} width={CELL} height={CELL} rx="2"
+              className="pv-pop fill-accent/35 stroke-accent/45" strokeWidth="1" style={d(0.3 + (i + j) * 0.07)} />
+          ) : (
+            <g key={`${i}-${j}`} className="pv-fade" style={d(1.2 + (i + j - N) * 0.1)}>
+              <rect x={x} y={y} width={CELL} height={CELL} rx="2" strokeDasharray="2.5 2"
+                className="pv-shimmer fill-accent/10 stroke-accent" strokeWidth="1" style={d(2.6 + (i + j - N) * 0.22)} />
+            </g>
+          )
+        })}
+        <g className="pv-fade" style={d(0.8)} fontFamily="IBM Plex Mono, monospace" fontSize="9">
+          <rect x="60" y="38" width="9" height="9" rx="2" className="fill-accent/35 stroke-accent/45" />
+          <text x="76" y="46" fill="var(--muted)">paid</text>
+          <rect x="60" y="56" width="9" height="9" rx="2" strokeDasharray="2.5 2" className="fill-accent/10 stroke-accent" />
+          <text x="76" y="64" fill="var(--muted)">projected</text>
+        </g>
+      </Svg>
+    </Frame>
+  )
+}
+
+// Quantitative finance: Monte Carlo paths with a VaR line, one path glowing at a time
+const WALKS = (() => {
+  const r = rng(42)
+  const normal = () => Math.sqrt(-2 * Math.log(r() + 1e-9)) * Math.cos(2 * Math.PI * r())
+  return Array.from({ length: 7 }, () => {
+    let y = 50
+    return smooth(Array.from({ length: 31 }, (_, s) => {
+      if (s) y = Math.min(88, Math.max(14, y + normal() * 4.2))
+      return [14 + (s / 30) * 372, y]
+    }))
+  })
+})()
+const WALK_COLORS = ['var(--accent)', 'var(--accent-2)', 'var(--fg)', 'var(--accent)', 'var(--accent-2)', 'var(--soft)', 'var(--muted)']
+
+export function QuantPreview() {
+  return (
+    <Frame label="monte carlo · VaR₉₉">
+      <Svg>
+        {WALKS.map((path, i) => (
+          <g key={i} className="pv-glow" style={d(2.4 + i * 1.1)}>
+            <Draw path={path} stroke={WALK_COLORS[i]} w={1.5} delay={i * 0.12} time={1.6} />
+          </g>
+        ))}
+        <g className="pv-fade" style={d(1.6)}>
+          <line x1="14" x2="386" y1="80" y2="80" stroke="var(--fg)" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
+          <text x="384" y="75" textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="8.5" fill="var(--muted)">VaR₉₉</text>
+        </g>
+      </Svg>
+    </Frame>
+  )
+}
+
+// Data and tools: a terminal typing itself out
+const TERM = [
   { t: '$ python reserve.py --method chain-ladder', c: 'text-soft' },
   { t: '>>> df = pd.read_csv("claims.csv")', c: 'text-accent' },
   { t: '>>> model.fit(X_train, y_train)', c: 'text-accent' },
   { t: '✓ model trained · report saved', c: 'text-good' },
 ]
+const START = [0.3, 1.9, 3.1, 4.2]
 
 export function ToolsPreview() {
   return (
     <Frame className="bg-card-2">
       <div className="flex gap-1.5 px-3 pt-2.5">
-        <span className="w-2 h-2 rounded-full bg-rose-400/70" />
-        <span className="w-2 h-2 rounded-full bg-amber-300/70" />
-        <span className="w-2 h-2 rounded-full bg-emerald-400/70" />
+        <span className="h-2 w-2 rounded-full bg-rose-400/70" />
+        <span className="h-2 w-2 rounded-full bg-amber-300/70" />
+        <span className="h-2 w-2 rounded-full bg-emerald-400/70" />
       </div>
-      <div className="px-3 pt-2 space-y-1 font-mono text-[11px] leading-tight">
-        {termLines.map((l, i) => (
-          <motion.p key={i} className={`whitespace-nowrap ${l.c}`}
-            initial={{ clipPath: 'inset(0 100% 0 0)' }}
-            whileInView={{ clipPath: frames('inset(0 100% 0 0)', 'inset(0 0% 0 0)') }} viewport={inView}
-            transition={cycle(i * 0.55, 0.6, 'linear')}>
+      <div className="space-y-1 px-3 pt-2 font-mono text-[11px] leading-tight">
+        {TERM.map((l, i) => (
+          <p key={i} className={`pv-type ${l.c}`}
+            style={{ '--w': `${l.t.length}ch`, '--n': l.t.length, '--t': `${l.t.length * 0.03}s`, '--d': `${START[i]}s` }}>
             {l.t}
-          </motion.p>
+          </p>
         ))}
+        <span className="pv-caret inline-block h-3 w-1.5 translate-y-0.5 bg-accent" style={d(5.2)} />
       </div>
     </Frame>
   )
@@ -197,90 +221,136 @@ export function ToolsPreview() {
 
 /* ════════ Project previews ════════ */
 
-// Credit risk: logistic curve with defaults (top) and non-defaults (bottom)
-const sigmoidPts = Array.from({ length: 51 }, (_, k) => {
-  const x = (k / 50) * 200
-  return [x, 72 - 60 / (1 + Math.exp(-(x - 100) / 16))]
+// Credit risk: defaults (top) and repayments (bottom) separated by a logistic curve
+const SIG = Array.from({ length: 41 }, (_, k) => {
+  const x = 14 + (k / 40) * 372
+  return [x, 82 - 62 / (1 + Math.exp(-(x - 200) / 34))]
 })
-const creditDots = (() => {
+const SIG_PATH = line(SIG)
+const CREDIT_DOTS = (() => {
   const r = rng(11)
-  return Array.from({ length: 22 }, () => {
-    const x = r() * 200
-    const p = 1 / (1 + Math.exp(-(x - 100) / 22))
-    const def = r() < p
-    const y = def ? 8 + r() * 8 : 64 + r() * 8
-    return { left: (x / 200) * 100, top: (y / 80) * 100, def }
+  return Array.from({ length: 26 }, () => {
+    const x = 20 + r() * 360
+    const def = r() < 1 / (1 + Math.exp(-(x - 200) / 46))
+    return { x, y: def ? 14 + r() * 14 : 72 + r() * 14, def }
   })
 })()
 
 export function CreditPreview() {
   return (
     <Frame label="P(default | x)">
-      {creditDots.map((d, i) => (
-        <motion.span key={i}
-          className={`absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full ${d.def ? 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.9)]' : 'bg-accent shadow-[0_0_6px_var(--glow)]'}`}
-          style={{ left: `${d.left}%`, top: `${d.top}%` }}
-          initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: frames(0, 1), scale: frames(0, 1) }} viewport={inView}
-          transition={cycle(i * 0.04, 0.4)} />
-      ))}
-      <Svg><DrawPath d={toPath(sigmoidPts)} delay={0.6} /></Svg>
+      <Svg>
+        <Draw path="M14,90 H386" stroke="var(--soft)" w={1} time={0.8} />
+        <g className="pv-fade" style={d(1.4)}>
+          <line x1="200" x2="200" y1="10" y2="90" stroke="var(--fg)" strokeWidth="1" strokeDasharray="3 4" opacity="0.5" />
+        </g>
+        {CREDIT_DOTS.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r="2.7" className="pv-pop"
+            fill={p.def ? 'var(--accent)' : 'var(--muted)'} style={d(0.3 + i * 0.035)} />
+        ))}
+        <Draw path={SIG_PATH} delay={0.6} time={1.5} glow />
+        <g>
+          <circle r="7" fill="var(--accent)" opacity="0.28" />
+          <circle r="2.6" fill="var(--beam-core)" />
+          <animateMotion dur="5s" begin="2.4s" repeatCount="indefinite" path={SIG_PATH} />
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="5s" begin="2.4s" repeatCount="indefinite" />
+        </g>
+      </Svg>
     </Frame>
   )
 }
 
-// Mortality: q(x) by age, two populations (Gompertz-style curves)
-const mortCurve = shift => Array.from({ length: 51 }, (_, k) => {
-  const age = (k / 50) * 100
-  const q = Math.min(1, 0.0002 * Math.exp(0.085 * (age - shift)) + 0.012 * Math.exp(-age / 1.5))
-  return [(k / 50) * 200, 74 - 64 * q]
-})
+// Flagship: life expectancy at 65 for Mexican men, observed (with the pandemic dip) and projected.
+// Real values from the project (observed: INEGI and CONAPO; scenarios: Lee-Carter fits, p5 to p95).
+const YEARS = [1950, 2070], VALS = [11, 24]
+const FX = y => 52 + ((y - YEARS[0]) / (YEARS[1] - YEARS[0])) * 408
+const FY = v => 250 - ((v - VALS[0]) / (VALS[1] - VALS[0])) * 216
+const OBS = [[1950, 12.08], [1955, 13.27], [1960, 13.57], [1965, 14.06], [1970, 14.06], [1975, 15.09], [1980, 14.97],
+  [1985, 15.38], [1990, 15.8], [1995, 15.87], [2000, 16.51], [2005, 16.47], [2010, 17.14], [2015, 17.47], [2019, 18.16],
+  [2020, 13.6], [2021, 13.7], [2024, 17.55]].map(([y, v]) => [FX(y), FY(v)])
+const SCEN = {
+  long: { mid: [[2024, 17.55], [2025, 17.61], [2040, 18.59], [2055, 19.56], [2070, 20.55]], hi: [17.72, 19.05, 20.32, 21.61], lo: [17.5, 18.1, 18.79, 19.52] },
+  recent: { mid: [[2024, 17.55], [2025, 17.56], [2040, 17.84], [2055, 18.1], [2070, 18.36]], hi: [17.67, 18.38, 19.04, 19.71], lo: [17.46, 17.28, 17.16, 17.1] },
+  conapo: { mid: [[2024, 17.55], [2025, 18.52], [2040, 20.08], [2055, 21.71], [2070, 23.24]] },
+}
+const toPts = mid => mid.map(([y, v]) => [FX(y), FY(v)])
+const band = ({ hi, lo }) => {
+  const ys = [2025, 2040, 2055, 2070]
+  const up = ys.map((y, i) => [FX(y), FY(hi[i])])
+  const dn = ys.map((y, i) => [FX(y), FY(lo[i])]).reverse()
+  return `${smooth(up)} L${dn[0][0].toFixed(1)},${dn[0][1].toFixed(1)} ${smooth(dn).replace(/^M[^C]*/, '')} Z`
+}
+const OBS_PATH = line(OBS)
+const LONG_PATH = smooth(toPts(SCEN.long.mid))
 
 export function MortalityPreview({ height }) {
+  const mono = { fontFamily: 'IBM Plex Mono, monospace' }
   return (
-    <Frame label="qₓ by age" height={height}>
-      <Svg>
-        <DrawPath d={toPath(mortCurve(0))} color="var(--accent)" />
-        <DrawPath d={toPath(mortCurve(5))} color="var(--fg)" dashed delay={0.4} />
+    <Frame label="e₆₅ · life expectancy at 65" height={height}>
+      <Svg vb="0 0 480 290">
+        {/* axes and ticks */}
+        <Draw path={`M52,24 V250 H474`} stroke="var(--soft)" w={1.2} time={1} />
+        <g className="pv-fade" style={d(0.5)} fontSize="9.5" {...mono} fill="var(--faint)">
+          {[1950, 2000, 2050].map(y => <text key={y} x={FX(y)} y="268" textAnchor="middle">{y}</text>)}
+          {[15, 20].map(v => <text key={v} x="44" y={FY(v) + 3} textAnchor="end">{v}</text>)}
+          {[15, 20].map(v => <line key={v} x1="52" x2="474" y1={FY(v)} y2={FY(v)} stroke="var(--line)" />)}
+        </g>
+        {/* scenario bands, then the observed history, then the projections */}
+        <path d={band(SCEN.long)} fill="var(--accent)" fillOpacity="0.22" className="pv-fade" style={d(2.3)} />
+        <path d={band(SCEN.recent)} fill="var(--fg)" fillOpacity="0.1" className="pv-fade" style={d(2.5)} />
+        <Draw path={OBS_PATH} stroke="var(--fg)" w={2} delay={0.5} time={1.9} />
+        <Draw path={smooth(toPts(SCEN.conapo.mid))} stroke="var(--muted)" w={1.5} delay={2.6} time={1} />
+        <Draw path={smooth(toPts(SCEN.recent.mid))} stroke="var(--soft)" w={1.8} delay={2.6} time={1} />
+        <Draw path={LONG_PATH} w={2.6} delay={2.4} time={1.2} glow />
+        {/* the pandemic */}
+        <g className="pv-fade" style={d(1.9)} {...mono} fontSize="9">
+          <line x1={FX(2020.5)} x2={FX(2020.5)} y1="30" y2="250" stroke="var(--fg)" strokeDasharray="2 4" opacity="0.4" />
+          <text x={FX(2020.5) - 5} y="40" textAnchor="end" fill="var(--muted)">COVID-19</text>
+        </g>
+        <g className="pv-fade" style={d(3.2)} {...mono} fontSize="9.5">
+          <text x="462" y="36" textAnchor="end" fill="var(--muted)">CONAPO official</text>
+          <text x="462" y={FY(21.61) - 8} textAnchor="end" fill="var(--accent)">long-run trend</text>
+          <text x="462" y={FY(17.1) + 16} textAnchor="end" fill="var(--soft)">recent trend</text>
+        </g>
+        <g>
+          <circle r="9" fill="var(--accent)" opacity="0.3" />
+          <circle r="3.4" fill="var(--beam-core)" />
+          <animateMotion dur="5s" begin="4s" repeatCount="indefinite" path={LONG_PATH} />
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="5s" begin="4s" repeatCount="indefinite" />
+        </g>
       </Svg>
-      <div className="absolute bottom-1 inset-x-2 flex justify-between font-mono text-[9px] text-faint">
-        <span>0</span><span>50</span><span>100</span>
-      </div>
     </Frame>
   )
 }
 
 // Claims dashboard: KPI tiles, monthly claim bars and a loss-ratio line
-const claimBars = (() => {
+const CLAIMS = (() => {
   const r = rng(5)
-  return Array.from({ length: 12 }, () => 30 + r() * 55)
+  return Array.from({ length: 12 }, () => 28 + r() * 52)
 })()
-const lossRatio = toPath(claimBars.map((h, i) => [((i + 0.5) / 12) * 200, 80 - (h * 0.8 + 6) * 0.8]))
+const CLAIM_X = i => 160 + i * 19.5
+const LOSS_PATH = smooth(CLAIMS.map((h, i) => [CLAIM_X(i) + 7, 84 - (h * 0.8 + 6) * 0.78]))
 
 export function ClaimsPreview() {
+  const mono = { fontFamily: 'IBM Plex Mono, monospace' }
   return (
     <Frame label="claims · loss ratio">
-      <div className="absolute inset-0 flex gap-2 p-2 pt-7">
-        <div className="flex flex-col gap-1.5 w-[28%]">
-          {['Loss ratio', 'Reserves', 'Claims'].map((k, i) => (
-            <motion.div key={k} className="flex-1 rounded border border-line bg-subtle px-1.5 py-1"
-              initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: frames(0, 1), x: frames(-8, 0) }} viewport={inView}
-              transition={cycle(i * 0.12, 0.5)}>
-              <p className="text-[8px] text-faint leading-none">{k}</p>
-              <div className="mt-1 h-1.5 w-3/4 rounded-full bg-gradient-to-r from-accent/70 to-accent-2/30" />
-            </motion.div>
-          ))}
-        </div>
-        <div className="relative flex-1">
-          <div className="absolute inset-0 flex items-end gap-[3px]">
-            {claimBars.map((h, i) => (
-              <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/30 border-t border-accent/70"
-                initial={{ height: '0%' }} whileInView={{ height: frames('0%', `${h}%`) }} viewport={inView}
-                transition={cycle(0.2 + i * 0.05, 0.7)} />
-            ))}
-          </div>
-          <Svg><DrawPath d={lossRatio} color="var(--accent)" delay={0.8} /></Svg>
-        </div>
-      </div>
+      <Svg>
+        {['Loss ratio', 'Reserves', 'Claims'].map((k, i) => (
+          <g key={k} className="pv-fade" style={d(0.2 + i * 0.12)}>
+            <rect x="16" y={24 + i * 22} width="124" height="18" rx="3" className="fill-subtle stroke-line" />
+            <text x="22" y={36 + i * 22} fontSize="8" {...mono} fill="var(--faint)">{k}</text>
+            <rect x="74" y={29 + i * 22} width={44 - i * 10} height="6" rx="3" fill="var(--accent)" opacity="0.7" />
+          </g>
+        ))}
+        {CLAIMS.map((h, i) => (
+          <rect key={i} x={CLAIM_X(i)} y={88 - h * 0.8} width="14" height={h * 0.8} rx="1.5"
+            className="pv-grow fill-accent/30 stroke-accent/60" strokeWidth="1" style={d(0.4 + i * 0.05)} />
+        ))}
+        <Draw path="M150,88 H394" stroke="var(--soft)" w={1} time={0.8} />
+        <Draw path={LOSS_PATH} delay={1} time={1.5} glow />
+        <line x1="150" x2="150" y1="14" y2="88" stroke="var(--beam-core)" strokeWidth="1.5" className="pv-sweep" style={{ '--span': '244px' }} />
+      </Svg>
     </Frame>
   )
 }

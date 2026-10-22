@@ -35,6 +35,11 @@ function ScrollCue() {
 
 export default function Hero() {
   const spotRef = useRef(null)
+  // Scroll parallax: the chart sinks and shrinks a little, the copy drifts up, as the page moves on
+  const { scrollY } = useScroll()
+  const sceneY = useTransform(scrollY, [0, 700], [0, 80])
+  const sceneScale = useTransform(scrollY, [0, 700], [1, 0.93])
+  const copyY = useTransform(scrollY, [0, 700], [0, -36])
 
   // Moves the blue spotlight with the cursor (CSS variables, no re-renders)
   const moveSpot = (e) => {
@@ -69,7 +74,7 @@ export default function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto grid w-full max-w-5xl items-center gap-12 py-10 lg:grid-cols-[1.02fr_1fr] lg:gap-10">
-      <div>
+      <motion.div style={{ y: copyY }}>
 
         {/* Status badge */}
         <Reveal y={10} blur={4} className="mb-8">
@@ -126,9 +131,11 @@ export default function Hero() {
         </Reveal>
 
         <ScrollCue />
-      </div>
+      </motion.div>
 
-      <HeroScene />
+      <motion.div style={{ y: sceneY, scale: sceneScale }}>
+        <HeroScene />
+      </motion.div>
       </div>
     </section>
   )

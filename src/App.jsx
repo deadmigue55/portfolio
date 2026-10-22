@@ -2,11 +2,13 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Skills from './components/Skills'
+import Story from './components/Story'
 import Projects from './components/Projects'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import NeonSymbols from './components/NeonSymbols'
 import Toaster from './components/Toast'
+import Spotlight from './components/Spotlight'
 import { CircuitDivider } from './components/Electric'
 import { MotionConfig } from 'motion/react'
 
@@ -19,6 +21,7 @@ export default function App() {
       <NeonSymbols />
       <Navbar />
       <Toaster />
+      <Spotlight />
       <main className="relative z-10">
         <Hero />
         <CircuitDivider />
@@ -26,8 +29,10 @@ export default function App() {
         <CircuitDivider late />
         <Skills />
         <CircuitDivider />
-        <Projects />
+        <Story />
         <CircuitDivider late />
+        <Projects />
+        <CircuitDivider />
         <Contact />
       </main>
       <div className="relative z-10">

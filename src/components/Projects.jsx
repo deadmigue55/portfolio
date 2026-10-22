@@ -2,7 +2,7 @@ import { useState } from 'react'
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
 import Reveal from './Reveal'
-import { BeamBorder } from './Electric'
+import { BeamBorder, SpotLayer } from './Electric'
 import { CreditPreview, MortalityPreview, ClaimsPreview } from './Previews'
 
 const MORTALITY_REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
@@ -175,10 +175,11 @@ function ProjectCard({ p }) {
 
   return (
     <article tabIndex={0} onClick={onCardClick} aria-label={`${p.title}: details on hover or focus`}
-      className={`neon-ring group relative rounded-xl border border-line bg-card outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+      className={`spot-card group relative rounded-xl border border-line bg-card outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
         wide ? 'grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 ease-out flex flex-col'}`}>
 
       {wide && <BeamBorder />}
+      <SpotLayer />
 
       {/* Animated preview: the part that stays */}
       <div className={wide ? 'p-5 lg:p-6' : 'p-6 pb-0'}>

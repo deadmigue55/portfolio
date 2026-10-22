@@ -24,3 +24,14 @@ export function CircuitLine({ className = '' }) {
     </div>
   )
 }
+
+// Cursor-following light for a card (see Spotlight.jsx for how the position reaches it).
+// A glow on the border and a faint one inside. The parent needs `spot-card`, `relative` and a radius.
+export function SpotLayer() {
+  return (
+    <>
+      <span aria-hidden="true" className="spot-fill" />
+      <span aria-hidden="true" className="spot-border" />
+    </>
+  )
+}

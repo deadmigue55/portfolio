@@ -2,6 +2,8 @@ import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
 import Reveal from './Reveal'
 import CopyButton from './CopyButton'
+import { SpotLayer } from './Electric'
+import { PlayBox } from './Previews'
 
 const EMAIL = 'migue.vilchis@ciencias.unam.mx'
 const PHONE_DISPLAY = '+1 (913) 707-0185'
@@ -47,32 +49,46 @@ const Icon = {
   ),
 }
 
-/* ── Preview "images": small mockups of each channel ── */
+/* ── Preview "images": small mockups of each channel, each with its own little story ── */
 const previewBox = 'relative h-44 overflow-hidden rounded-t-2xl border-b border-line bg-gradient-to-br from-card-2 to-card p-5'
+const d = seconds => ({ '--d': `${seconds}s` })
+const typed = (text, start) => ({ '--w': `${text.length}ch`, '--n': text.length, '--t': `${text.length * 0.035}s`, '--d': `${start}s` })
 
+const SUBJECT = "Let's build something"
+const BODY = "Hi Miguel, we'd love to chat about a role"
+
+// The message writes itself, then "sends"
 function EmailPreview() {
   return (
-    <div className={previewBox} aria-hidden="true">
+    <PlayBox className={previewBox}>
       <div className="rounded-lg border border-line bg-card shadow-[0_0_30px_var(--glow)] transition-transform duration-500 group-hover:-translate-y-1">
-        <div className="flex gap-1.5 px-3 py-2 border-b border-line">
+        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-line">
           <span className="w-2 h-2 rounded-full bg-rose-400/70" />
           <span className="w-2 h-2 rounded-full bg-amber-300/70" />
           <span className="w-2 h-2 rounded-full bg-emerald-400/70" />
+          <span className="pv-slide ml-auto flex items-center gap-1 text-[10px] font-medium text-good" style={d(4.3)}>
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+            Sent
+          </span>
         </div>
-        <div className="px-3 py-2.5 space-y-1.5 text-[11px]">
-          <p className="text-faint">To: <span className="text-fg">{EMAIL}</span></p>
-          <p className="text-faint">Subject: <span className="text-fg">Let's build something</span></p>
-          <p className="text-soft pt-1">Hi Miguel, we'd love to chat about a role<span className="caret text-accent">|</span></p>
+        <div className="px-3 py-2.5 space-y-1.5 font-mono text-[11px]">
+          <p className="text-faint whitespace-nowrap">To: <span className="pv-type inline-block align-bottom text-fg" style={typed(EMAIL, 0.3)}>{EMAIL}</span></p>
+          <p className="text-faint whitespace-nowrap">Subject: <span className="pv-type inline-block align-bottom text-fg" style={typed(SUBJECT, 1.5)}>{SUBJECT}</span></p>
+          <p className="pt-1 text-soft whitespace-nowrap">
+            <span className="pv-type inline-block align-bottom" style={typed(BODY, 2.4)}>{BODY}</span>
+            <span className="pv-caret inline-block h-3 w-1 translate-y-0.5 bg-accent" style={d(2.4)} />
+          </p>
         </div>
       </div>
-    </div>
+    </PlayBox>
   )
 }
 
+// A message arrives, a typing indicator shows, then the reply
 function WhatsAppPreview() {
   return (
-    <div className={previewBox} aria-hidden="true">
-      <div className="flex items-center gap-2 mb-3">
+    <PlayBox className={previewBox}>
+      <div className="pv-fade flex items-center gap-2 mb-3" style={d(0.1)}>
         <span className="w-7 h-7 rounded-full bg-good/20 border border-good/40 grid place-items-center text-[10px] font-semibold text-good">MV</span>
         <div className="leading-tight">
           <p className="text-[11px] text-fg font-medium">Miguel Vilchis</p>
@@ -80,32 +96,39 @@ function WhatsAppPreview() {
         </div>
       </div>
       <div className="space-y-2 text-[11px]">
-        <p className="ml-auto w-fit max-w-[80%] rounded-lg rounded-tr-sm bg-good/30 border border-good/20 px-3 py-1.5 text-fg transition-transform duration-500 group-hover:-translate-x-1">
+        <p className="pv-slide ml-auto w-fit max-w-[80%] rounded-lg rounded-tr-sm bg-good/30 border border-good/20 px-3 py-1.5 text-fg" style={d(0.5)}>
           Hi Miguel! Free for a quick call this week?
         </p>
-        <p className="w-fit max-w-[80%] rounded-lg rounded-tl-sm bg-subtle border border-line px-3 py-1.5 text-fg transition-transform duration-500 group-hover:translate-x-1">
-          Absolutely. Calling you now.
-        </p>
+        <div className="grid">
+          <div className="pv-dots col-start-1 row-start-1 w-fit items-center gap-1 rounded-lg rounded-tl-sm border border-line bg-subtle px-3 py-2.5"
+            style={{ '--d': '1.5s', '--len': '1.4s' }}>
+            <i /><i /><i />
+          </div>
+          <p className="pv-slide col-start-1 row-start-1 w-fit max-w-[80%] rounded-lg rounded-tl-sm bg-subtle border border-line px-3 py-1.5 text-fg" style={d(2.9)}>
+            Absolutely. Calling you now.
+          </p>
+        </div>
       </div>
-    </div>
+    </PlayBox>
   )
 }
 
+// The profile card lands, its banner shimmers and the Connect button keeps pulsing
 function LinkedInPreview() {
   return (
-    <div className={previewBox} aria-hidden="true">
-      <div className="rounded-lg overflow-hidden border border-line bg-card transition-transform duration-500 group-hover:-translate-y-1">
-        <div className="h-10 bg-gradient-to-r from-accent/60 to-accent-2/40" />
+    <PlayBox className={previewBox}>
+      <div className="pv-slide rounded-lg overflow-hidden border border-line bg-card transition-transform duration-500 group-hover:-translate-y-1" style={d(0.2)}>
+        <div className="pv-banner h-10 bg-gradient-to-r from-accent/60 via-accent-2/40 to-accent/60" />
         <div className="px-3 pb-3 -mt-5 flex items-end gap-3">
           <span className="w-11 h-11 rounded-full border-2 border-card bg-gradient-to-br from-accent to-accent-2 grid place-items-center text-xs font-bold text-on-accent shadow-[0_0_14px_var(--glow)]">MV</span>
           <div className="flex-1 min-w-0 leading-tight">
             <p className="text-[12px] text-fg font-semibold truncate">Miguel Vilchis</p>
             <p className="text-[10px] text-muted truncate">Actuary · Pricing &amp; Risk · Data &amp; AI</p>
           </div>
-          <span className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-semibold text-on-accent">Connect</span>
+          <span className="pv-ping shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-semibold text-on-accent" style={d(1.8)}>Connect</span>
         </div>
       </div>
-    </div>
+    </PlayBox>
   )
 }
 
@@ -113,7 +136,7 @@ function LinkedInPreview() {
 const contribCells = Array.from({ length: 7 * 20 }, (_, i) => {
   const col = Math.floor(i / 7)
   const row = i % 7
-  return (row * 7 + col * 13 + row * col) % 5
+  return { col, level: (row * 7 + col * 13 + row * col) % 5 }
 })
 const contribShade = [
   'bg-subtle',
@@ -123,9 +146,10 @@ const contribShade = [
   'bg-accent shadow-[0_0_6px_var(--glow)]',
 ]
 
+// The graph fills in column by column, then the brightest days keep twinkling
 function GitHubPreview() {
   return (
-    <div className={previewBox} aria-hidden="true">
+    <PlayBox className={previewBox}>
       <div className="flex items-center gap-3 mb-4">
         <div className="relative w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-accent/15 grid place-items-center text-xs font-bold text-fg shadow-[0_0_14px_var(--glow)]">
           MV
@@ -143,16 +167,19 @@ function GitHubPreview() {
         </div>
       </div>
       <div className="grid grid-flow-col grid-rows-7 gap-[3px] w-fit">
-        {contribCells.map((level, i) => (
-          <span key={i} className={`w-2 h-2 rounded-[2px] ${contribShade[level]}`} />
+        {contribCells.map(({ col, level }, i) => (
+          <span key={i} className="pv-fade block" style={d(0.2 + col * 0.045)}>
+            <span className={`block w-2 h-2 rounded-[2px] ${contribShade[level]} ${level === 4 ? 'pv-shimmer' : ''}`}
+              style={level === 4 ? d(2 + (i % 9) * 0.35) : undefined} />
+          </span>
         ))}
       </div>
-    </div>
+    </PlayBox>
   )
 }
 
 /* ── Card shell ── */
-const cardClass = 'neon-ring group flex h-full flex-col rounded-2xl border border-line bg-card transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1'
+const cardClass = 'spot-card relative group flex h-full flex-col rounded-2xl border border-line bg-card transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1'
 
 function CardBody({ icon, label, value, note, external }) {
   return (
@@ -179,6 +206,7 @@ function LinkCard({ href, preview, ...body }) {
       rel={external ? 'noopener noreferrer' : undefined}
       className={cardClass}
     >
+      <SpotLayer />
       {preview}
       <CardBody {...body} external />
     </a>
@@ -191,6 +219,7 @@ const iconNudge = 'transition-transform duration-200 group-hover/btn:-rotate-12 
 function EmailCard() {
   return (
     <div className={cardClass}>
+      <SpotLayer />
       <EmailPreview />
       <CardBody icon={Icon.email} label="Email" value={EMAIL} />
       <div className="mt-auto flex flex-wrap gap-3 px-5 pb-5 pt-1">
@@ -209,6 +238,7 @@ function EmailCard() {
 function PhoneCard() {
   return (
     <div className={cardClass}>
+      <SpotLayer />
       <WhatsAppPreview />
       <CardBody
         icon={Icon.phone}
