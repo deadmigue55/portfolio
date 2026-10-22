@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'motion/react'
 import { BeamBorder } from './Electric'
 import CountUp from './CountUp'
@@ -54,13 +55,35 @@ const stats = [
   { to: 15, label: 'planted effects the study found', format: v => `${Math.round(v)}/15` },
 ]
 
+// The quick view shown over the chart on hover (mouse), focus (keyboard) or tap (touch)
+const BRIEF = [
+  ['What you see', 'The chance that a Mexican man dies within a year, at each age (2023, log scale). The solid line is rebuilt from INEGI deaths and CONAPO population. The dashed line is CNSF 2013, the table the regulator still points to.'],
+  ['The gap', 'At 40, men die at 4.1 times the rate in that table, and the gap stays 3 to 4 times across working ages. The table is more than ten years old and blends both sexes.'],
+  ['Why it matters', 'Premiums and reserves are built on mortality tables. A table that is too light makes life cover look cheaper and safer than it is, and 746,000 excess deaths in 2020 to 2022 show how fast the old trend can break.'],
+]
+
 export default function HeroScene() {
+  const [open, setOpen] = useState(false)
+  // Mouse opens on hover, keyboard on focus, touch on tap. Pen and touch toggle with a tap.
+  const onClick = e => {
+    const type = e.nativeEvent.pointerType
+    if (type === 'touch' || type === 'pen') setOpen(v => !v)
+  }
   return (
     <motion.div
+      tabIndex={0}
+      role="group"
+      aria-label="Chart: Mexican men's mortality against the regulatory table. Hover, focus or tap for a short explanation."
+      onPointerEnter={e => e.pointerType === 'mouse' && setOpen(true)}
+      onPointerLeave={e => e.pointerType === 'mouse' && setOpen(false)}
+      onFocus={e => e.currentTarget.matches(':focus-visible') && setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onKeyDown={e => e.key === 'Escape' && setOpen(false)}
+      onClick={onClick}
       initial={{ opacity: 0, y: 28, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="relative rounded-2xl border border-line bg-card p-4 sm:p-5"
+      className="relative rounded-2xl border border-line bg-card p-4 outline-none focus-visible:border-accent sm:p-5"
     >
       <BeamBorder />
 
@@ -71,6 +94,21 @@ export default function HeroScene() {
         </span>
         <span className="hidden sm:inline">2023</span>
       </div>
+
+      {/* Quick view */}
+      <div aria-hidden="true"
+        className={`absolute inset-0 z-20 flex flex-col justify-center gap-3 overflow-hidden rounded-2xl border border-accent/40 bg-card p-5 shadow-[0_0_40px_var(--glow-soft)] transition-[opacity,transform] duration-300 ease-out sm:gap-4 sm:p-6 ${
+          open ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'}`}>
+        {BRIEF.map(([title, text], i) => (
+          <div key={title} className={`transition-[opacity,transform] duration-500 ease-out ${i === 0 ? 'hidden sm:block' : ''}`}
+            style={{ transitionDelay: open ? `${80 + i * 70}ms` : '0ms', opacity: open ? 1 : 0, transform: open ? 'none' : 'translateY(8px)' }}>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">{title}</p>
+            <p className="mt-1 text-[12.5px] leading-snug text-soft sm:mt-1.5 sm:text-sm sm:leading-relaxed">{text}</p>
+          </div>
+        ))}
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Sources: INEGI, CONAPO, CNSF</p>
+      </div>
+      <p className="sr-only">{BRIEF.map(([title, text]) => `${title}: ${text}`).join(' ')}</p>
 
       <div className="relative mt-3">
         <div className="dot-grid absolute inset-0" aria-hidden="true" />
@@ -138,6 +176,11 @@ export default function HeroScene() {
             <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="5.5s" begin="3.4s" repeatCount="indefinite" />
           </g>
         </svg>
+        <span aria-hidden="true"
+          className={`pointer-events-none absolute bottom-1 right-1 rounded-full border border-line bg-bg/80 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted transition-opacity duration-300 ${open ? 'opacity-0' : 'opacity-100'}`}>
+          <span className="[@media(hover:hover)]:hidden">Tap</span>
+          <span className="hidden [@media(hover:hover)]:inline">Hover</span> for the story
+        </span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
