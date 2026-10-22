@@ -86,51 +86,51 @@ const projects = [
 
 const statusColor = {
   'In Progress': 'bg-amber-500/10 text-amber-300 border-amber-500/25',
-  'Planned':     'bg-sky-500/10 text-sky-300 border-sky-500/25',
-  'Live':        'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
+  'Planned':     'bg-accent/10 text-accent border-accent/25',
+  'Live':        'bg-good/10 text-good border-good/25',
 }
 
 const hoverCapable = () =>
   typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
 
 function Chip({ children }) {
-  return <span className="text-xs text-slate-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded">{children}</span>
+  return <span className="text-xs text-soft bg-subtle border border-line px-2 py-0.5 rounded">{children}</span>
 }
 
 function Details({ p, wide, onClose }) {
   const d = p.details
   return (
-    <div className={`h-full overflow-y-auto rounded-xl bg-[#07070f]/95 backdrop-blur-md p-5 ${wide ? 'lg:p-8' : ''}`}>
+    <div className={`h-full overflow-y-auto rounded-xl bg-bg/95 backdrop-blur-md p-5 ${wide ? 'lg:p-8' : ''}`}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <p className="neon-eyebrow text-[11px] font-medium tracking-widest uppercase">Quick view</p>
-          <h3 className="text-white font-bold text-lg mt-1">{p.title}</h3>
+          <h3 className="text-fg font-bold text-lg mt-1">{p.title}</h3>
         </div>
         <button type="button" onClick={onClose}
-          className="[@media(hover:hover)]:hidden shrink-0 rounded-lg border border-white/15 px-3 py-1 text-xs text-slate-300">
+          className="[@media(hover:hover)]:hidden shrink-0 rounded-lg border border-line px-3 py-1 text-xs text-soft">
           Close
         </button>
       </div>
 
       <div className={wide ? 'grid lg:grid-cols-3 gap-6' : 'space-y-4'}>
         <section>
-          <h4 className="text-sky-300 text-xs font-semibold uppercase tracking-wider mb-2">{d.whatTitle}</h4>
-          <ul className="space-y-2 text-[13px] leading-relaxed text-slate-300">
+          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">{d.whatTitle}</h4>
+          <ul className="space-y-2 text-[13px] leading-relaxed text-soft">
             {d.what.map(w => (
-              <li key={w} className="flex gap-2"><span className="text-cyan-400 mt-1.5 size-1 shrink-0 rounded-full bg-cyan-400" />{w}</li>
+              <li key={w} className="flex gap-2"><span className="text-accent mt-1.5 size-1 shrink-0 rounded-full bg-accent" />{w}</li>
             ))}
           </ul>
         </section>
 
         <section>
-          <h4 className="text-sky-300 text-xs font-semibold uppercase tracking-wider mb-2">Why it was needed</h4>
-          <p className="text-[13px] leading-relaxed text-slate-300">{d.why}</p>
+          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">Why it was needed</h4>
+          <p className="text-[13px] leading-relaxed text-soft">{d.why}</p>
           {d.results && (
             <dl className="grid grid-cols-2 gap-2 mt-4">
               {d.results.map(r => (
-                <div key={r.value} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <dt className="text-base font-bold text-sky-300">{r.value}</dt>
-                  <dd className="text-[11px] text-slate-400 leading-snug mt-0.5">{r.label}</dd>
+                <div key={r.value} className="rounded-lg border border-line bg-subtle px-3 py-2">
+                  <dt className="text-base font-bold text-accent">{r.value}</dt>
+                  <dd className="text-[11px] text-muted leading-snug mt-0.5">{r.label}</dd>
                 </div>
               ))}
             </dl>
@@ -138,18 +138,18 @@ function Details({ p, wide, onClose }) {
         </section>
 
         <section>
-          <h4 className="text-sky-300 text-xs font-semibold uppercase tracking-wider mb-2">Built with</h4>
+          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">Built with</h4>
           <div className="flex flex-wrap gap-1.5">
             {d.tech.map(t => <Chip key={t}>{t}</Chip>)}
           </div>
           {p.repo
             ? (
               <a href={p.repo} target="_blank" rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#04101c] bg-gradient-to-r from-cyan-300 to-sky-400 hover:from-cyan-200 hover:to-sky-300 transition-colors">
+                className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-on-accent bg-accent hover:brightness-110 transition-colors">
                 Go deeper: the repository →
               </a>
             )
-            : <p className="mt-5 text-sm text-slate-500">The repository and write-up will be linked here when this ships.</p>}
+            : <p className="mt-5 text-sm text-faint">The repository and write-up will be linked here when this ships.</p>}
         </section>
       </div>
     </div>
@@ -172,7 +172,7 @@ function ProjectCard({ p }) {
 
   return (
     <article tabIndex={0} onClick={onCardClick} aria-label={`${p.title}: details on hover or focus`}
-      className={`neon-ring group relative rounded-xl border border-white/10 bg-[#0c0c14]/85 backdrop-blur-sm outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 ${
+      className={`neon-ring group relative rounded-xl border border-line bg-card backdrop-blur-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
         wide ? 'md:col-span-2 grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 flex flex-col'}`}>
 
       {/* Animated preview: the part that stays */}
@@ -183,15 +183,15 @@ function ProjectCard({ p }) {
       <div className={`flex flex-col ${wide ? 'p-6 lg:p-8' : 'p-6 flex-1'}`}>
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${statusColor[p.status]}`}>{p.status}</span>
-          {p.kicker && <span className="text-xs uppercase tracking-widest text-slate-500">{p.kicker}</span>}
+          {p.kicker && <span className="text-xs uppercase tracking-widest text-faint">{p.kicker}</span>}
         </div>
 
-        <h3 className={`text-white font-semibold mb-2 ${wide ? 'text-2xl font-bold mb-3' : ''}`}>{p.title}</h3>
-        <p className="text-slate-400 text-sm leading-relaxed flex-1">{p.desc}</p>
+        <h3 className={`text-fg font-semibold mb-2 ${wide ? 'text-2xl font-bold mb-3' : ''}`}>{p.title}</h3>
+        <p className="text-muted text-sm leading-relaxed flex-1">{p.desc}</p>
 
         <div className="flex flex-wrap gap-1.5 mt-4">
           {p.tags.map(t => (
-            <span key={t} className="text-xs text-slate-400 bg-white/5 px-2 py-0.5 rounded">{t}</span>
+            <span key={t} className="text-xs text-muted bg-subtle px-2 py-0.5 rounded">{t}</span>
           ))}
         </div>
 
@@ -201,16 +201,16 @@ function ProjectCard({ p }) {
               {p.links.map(l => (
                 <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer"
                   className={l.primary
-                    ? 'px-4 py-2 rounded-lg text-sm font-medium text-[#04101c] bg-gradient-to-r from-cyan-300 to-sky-400 hover:from-cyan-200 hover:to-sky-300 transition-colors'
-                    : 'px-4 py-2 rounded-lg text-sm font-medium text-slate-200 border border-white/15 hover:border-sky-300/60 hover:text-white transition-colors'}>
+                    ? 'px-4 py-2 rounded-lg text-sm font-medium text-on-accent bg-accent hover:brightness-110 transition-colors'
+                    : 'px-4 py-2 rounded-lg text-sm font-medium text-fg border border-line hover:border-accent/60 hover:text-fg transition-colors'}>
                   {l.label}{l.primary ? ' →' : ''}
                 </a>
               ))}
             </div>
           )
-          : <span className="mt-5 text-sm text-slate-600">Write-up coming soon</span>}
+          : <span className="mt-5 text-sm text-faint">Write-up coming soon</span>}
 
-        <p className="mt-5 text-[11px] uppercase tracking-widest text-slate-600 group-hover:text-sky-300/80 transition-colors">
+        <p className="mt-5 text-[11px] uppercase tracking-widest text-faint group-hover:text-accent transition-colors">
           <span className="hidden [@media(hover:hover)]:inline">Hover</span>
           <span className="[@media(hover:hover)]:hidden">Tap</span> for the quick view
         </p>
@@ -238,7 +238,7 @@ export default function Projects() {
           {projects.map(p => <ProjectCard key={p.title} p={p} />)}
         </div>
 
-        <p className="text-slate-500 text-sm mt-8">
+        <p className="text-faint text-sm mt-8">
           More projects are in the pipeline. This page grows as they ship.
         </p>
       </div>

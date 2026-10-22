@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react'
+import ThemeToggle from './ThemeToggle'
 
 const links = ['About', 'Skills', 'Projects', 'Contact']
 
@@ -72,21 +73,22 @@ export default function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter] duration-300 ${solid ? 'bg-[#0a0a0f]/85 backdrop-blur-md' : ''}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter] duration-300 ${solid ? 'bg-bg/85 backdrop-blur-md' : ''}`}
     >
       <div className={`max-w-5xl mx-auto px-6 flex items-center justify-between transition-[padding] duration-300 ${scrolled ? 'py-3' : 'py-4'}`}>
 
         {/* Logo */}
-        <motion.a href="#home" className="text-white font-semibold tracking-tight text-lg"
+        <motion.a href="#home" className="text-fg font-semibold tracking-tight text-lg"
           whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
           MV
           <motion.span
-            className="inline-block text-cyan-300 [text-shadow:0_0_10px_rgba(34,211,238,0.9)]"
+            className="inline-block text-accent [text-shadow:0_0_10px_var(--glow)]"
             animate={{ opacity: [1, 0.35, 1, 1, 0.6, 1] }}
             transition={{ duration: 4, repeat: Infinity, times: [0, 0.05, 0.1, 0.7, 0.75, 0.8] }}
           >.</motion.span>
         </motion.a>
 
+        <div className="flex items-center gap-1 md:gap-3">
         {/* Desktop links */}
         <motion.ul
           className="hidden md:flex gap-1"
@@ -101,7 +103,7 @@ export default function Navbar() {
                 <a
                   href={`#${id}`}
                   onMouseEnter={() => setHovered(id)}
-                  className={`nav-link relative z-10 block px-4 py-2 text-sm ${isActive ? 'text-sky-100' : 'text-slate-400'}`}
+                  className={`nav-link relative z-10 block px-4 py-2 text-sm ${isActive ? 'text-fg' : 'text-muted'}`}
                 >
                   {link}
                 </a>
@@ -110,7 +112,7 @@ export default function Navbar() {
                 {hovered === id && (
                   <motion.span
                     layoutId="nav-hover"
-                    className="absolute inset-0 rounded-lg bg-sky-400/10 border border-sky-400/20"
+                    className="absolute inset-0 rounded-lg bg-accent/10 border border-accent/20"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -119,7 +121,7 @@ export default function Navbar() {
                 {isActive && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.9)]"
+                    className="absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full bg-accent shadow-[0_0_10px_var(--glow)]"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -128,9 +130,11 @@ export default function Navbar() {
           })}
         </motion.ul>
 
+        <ThemeToggle />
+
         {/* Mobile hamburger */}
         <motion.button
-          className="md:hidden text-slate-300 hover:text-white p-1"
+          className="md:hidden text-soft hover:text-fg p-1"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
@@ -138,6 +142,7 @@ export default function Navbar() {
         >
           <MenuIcon open={menuOpen} />
         </motion.button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -164,7 +169,7 @@ export default function Navbar() {
                       show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
                     }}
                     onClick={() => setMenuOpen(false)}
-                    className={`nav-link block py-2.5 text-base ${active === id ? 'text-sky-200' : 'text-slate-400'}`}
+                    className={`nav-link block py-2.5 text-base ${active === id ? 'text-fg' : 'text-muted'}`}
                   >
                     {link}
                   </motion.a>
@@ -179,7 +184,7 @@ export default function Navbar() {
       <motion.div
         aria-hidden="true"
         style={{ scaleX: progress }}
-        className="absolute bottom-0 inset-x-0 h-px origin-left bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+        className="absolute bottom-0 inset-x-0 h-px origin-left bg-gradient-to-r from-accent via-accent-2 to-accent shadow-[0_0_8px_var(--glow)]"
       />
     </motion.nav>
   )

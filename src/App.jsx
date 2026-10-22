@@ -12,7 +12,7 @@ export default function App() {
   return (
     // reducedMotion="user": Motion animations calm down for visitors who ask for less motion
     <MotionConfig reducedMotion="user">
-    <div className="min-h-screen bg-[#0a0a0f] text-slate-200 antialiased">
+    <div className="min-h-screen bg-bg text-fg antialiased">
       {/* Fixed neon background behind every section */}
       <NeonSymbols />
       <Navbar />

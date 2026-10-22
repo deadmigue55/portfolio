@@ -4,16 +4,59 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="https://deadmigue.vercel.app/" />
+    <!-- Fonts: Bricolage Grotesque (headings), IBM Plex Sans and Mono (text, numbers), Instrument Serif (surname) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" />
     <title>Miguel Vilchis · Actuary, Pricing & Risk, Data & AI</title>
-    <meta name="description" content="Miguel Vilchis: actuary working in pricing and risk analytics at SCOR. UNAM Actuarial Science graduate building data science, fintech and AI projects. Open to roles in Mexico City or remote." />
-    <meta name="theme-color" content="#0a0a0f" />
+    <meta name="description" content="Miguel Vilchis: actuary working in pricing and risk analytics at SCOR. Rebuilt Mexico's mortality tables from 3 million death records, then priced, stress-tested and reinsured them. Open to roles in Mexico City or remote." />
+
+    <!-- Light and dark, following the visitor's system. Light is the fallback. -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#FFF4EA" />
+    <script>
+      // Applies a saved theme choice before first paint, so there is no flash
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#07162B' : '#FFF4EA');
+      } catch (e) {}
+    </script>
 
     <!-- Link previews (LinkedIn, WhatsApp, X, Slack) -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Miguel Vilchis" />
     <meta property="og:title" content="Miguel Vilchis · Actuary, Pricing & Risk, Data & AI" />
-    <meta property="og:description" content="Actuary in pricing and risk analytics at SCOR, building data science, fintech and AI projects." />
-    <meta property="og:url" content="https://portfolio-psi-nine-sz4lsw795q.vercel.app/" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:description" content="I rebuilt Mexico's mortality tables from 3 million death records, then priced, stress-tested and reinsured them. Live dashboard, report and Excel workbook." />
+    <meta property="og:url" content="https://deadmigue.vercel.app/" />
+    <meta property="og:image" content="https://deadmigue.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Miguel Vilchis, actuary. Mexican men's mortality against the regulatory table, with 746k excess deaths, 4.1 times the regulatory rate and 15 of 15 planted effects recovered." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_MX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Miguel Vilchis · Actuary, Pricing & Risk, Data & AI" />
+    <meta name="twitter:description" content="I rebuilt Mexico's mortality tables from 3 million death records, then priced, stress-tested and reinsured them." />
+    <meta name="twitter:image" content="https://deadmigue.vercel.app/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Miguel Vilchis",
+        "url": "https://deadmigue.vercel.app/",
+        "image": "https://deadmigue.vercel.app/og-image.png",
+        "description": "Actuary working in pricing and risk analytics. Builds data science and AI projects for insurance and finance.",
+        "alumniOf": { "@type": "CollegeOrUniversity", "name": "Facultad de Ciencias, UNAM" },
+        "worksFor": { "@type": "Organization", "name": "SCOR" },
+        "knowsAbout": ["Actuarial science", "Mortality modelling", "Reinsurance", "Pricing", "Machine learning"],
+        "sameAs": ["https://github.com/deadmigue55", "https://www.linkedin.com/in/deadmigue"]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

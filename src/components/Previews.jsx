@@ -23,10 +23,10 @@ const loop = (delay = 0, duration = 1.6) => ({
 
 function Frame({ label, children, className = '', height = 'h-28' }) {
   return (
-    <div className={`relative ${height} overflow-hidden rounded-lg border border-white/5 bg-gradient-to-br from-[#0b1a33]/80 via-[#0a0f1f]/70 to-[#0a0a12]/40 ${className}`} aria-hidden="true">
+    <div className={`relative ${height} overflow-hidden rounded-lg border border-line bg-gradient-to-br from-card-2 to-card ${className}`} aria-hidden="true">
       {children}
       {label && (
-        <span className="absolute top-2 left-2 z-10 rounded bg-black/40 px-1.5 py-0.5 font-mono text-[10px] text-sky-300/90">
+        <span className="absolute top-2 left-2 z-10 rounded bg-bg/70 px-1.5 py-0.5 font-mono text-[10px] text-accent">
           {label}
         </span>
       )}
@@ -35,13 +35,13 @@ function Frame({ label, children, className = '', height = 'h-28' }) {
 }
 
 // SVG line that draws itself (stretches to fill the frame)
-function DrawPath({ d, color = '#22d3ee', width = 2, delay = 0, dashed = false, glow = true }) {
+function DrawPath({ d, color = 'var(--accent)', width = 2, delay = 0, dashed = false, glow = true }) {
   return (
     <motion.path
       d={d} fill="none" stroke={color} strokeWidth={width} strokeLinecap="round"
       strokeDasharray={dashed ? '4 4' : undefined}
       vectorEffect="non-scaling-stroke"
-      style={glow ? { filter: `drop-shadow(0 0 4px ${color})` } : undefined}
+      style={glow ? { filter: 'drop-shadow(0 0 4px var(--glow))' } : undefined}
       initial={{ pathLength: 0, opacity: 0 }}
       whileInView={{ pathLength: 1, opacity: 1 }}
       viewport={inView}
@@ -79,7 +79,7 @@ export function StatsPreview() {
     <Frame label="N(μ, σ²)">
       <div className="absolute inset-x-0 bottom-[5%] top-0 flex items-end gap-[2px] px-[1px]">
         {bellBars.map((h, i) => (
-          <motion.div key={i} className="flex-1 rounded-t-sm bg-sky-500/25 border-t border-sky-300/60"
+          <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/25 border-t border-accent/60"
             initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={inView}
             transition={loop(i * 0.04, 0.9)} />
         ))}
@@ -103,17 +103,17 @@ export function ActuarialPreview() {
             return (
               <motion.div key={`${i}-${j}`}
                 className={known
-                  ? 'rounded-[2px] bg-sky-500/35 border border-sky-300/40'
-                  : 'rounded-[2px] border border-dashed border-cyan-300/80 bg-cyan-300/10 shadow-[0_0_6px_rgba(103,232,249,0.5)]'}
+                  ? 'rounded-[2px] bg-accent/35 border border-accent/40'
+                  : 'rounded-[2px] border border-dashed border-accent/80 bg-accent/10 shadow-[0_0_6px_var(--glow)]'}
                 initial={{ opacity: 0, scale: 0.5 }}
                 whileInView={{ opacity: 1, scale: 1 }} viewport={inView}
                 transition={loop(known ? (i + j) * 0.07 : 0.6 + (i + j - N) * 0.09, 0.45)} />
             )
           })}
         </div>
-        <div className="flex flex-col gap-1.5 text-[10px] text-slate-400">
-          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] bg-sky-500/50" /> paid</span>
-          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] border border-dashed border-cyan-300" /> projected</span>
+        <div className="flex flex-col gap-1.5 text-[10px] text-muted">
+          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] bg-accent/50" /> paid</span>
+          <span className="flex items-center gap-1.5"><i className="w-2 h-2 rounded-[2px] border border-dashed border-accent" /> projected</span>
         </div>
       </div>
     </Frame>
@@ -132,7 +132,7 @@ const walks = (() => {
     }))
   })
 })()
-const walkColors = ['#22d3ee', '#38bdf8', '#818cf8', '#60a5fa', '#67e8f9', '#3b82f6', '#a5b4fc']
+const walkColors = ['var(--accent)', 'var(--accent-2)', 'var(--fg)', 'var(--accent)', 'var(--accent-2)', 'var(--soft)', 'var(--muted)']
 
 export function QuantPreview() {
   return (
@@ -141,7 +141,7 @@ export function QuantPreview() {
         {walks.map((d, i) => (
           <DrawPath key={i} d={d} color={walkColors[i]} width={1.4} delay={i * 0.12} glow={i < 3} />
         ))}
-        <DrawPath d="M0,68 L200,68" color="#f472b6" width={1} dashed delay={1} glow={false} />
+        <DrawPath d="M0,68 L200,68" color="var(--fg)" width={1} dashed delay={1} glow={false} />
       </Svg>
     </Frame>
   )
@@ -149,15 +149,15 @@ export function QuantPreview() {
 
 // Data & Tools: terminal lines typing themselves out
 const termLines = [
-  { t: '$ python reserve.py --method chain-ladder', c: 'text-slate-300' },
-  { t: '>>> df = pd.read_csv("claims.csv")', c: 'text-sky-300' },
-  { t: '>>> model.fit(X_train, y_train)', c: 'text-sky-300' },
-  { t: '✓ model trained · report saved', c: 'text-emerald-300' },
+  { t: '$ python reserve.py --method chain-ladder', c: 'text-soft' },
+  { t: '>>> df = pd.read_csv("claims.csv")', c: 'text-accent' },
+  { t: '>>> model.fit(X_train, y_train)', c: 'text-accent' },
+  { t: '✓ model trained · report saved', c: 'text-good' },
 ]
 
 export function ToolsPreview() {
   return (
-    <Frame className="bg-[#070a12]/90">
+    <Frame className="bg-card-2">
       <div className="flex gap-1.5 px-3 pt-2.5">
         <span className="w-2 h-2 rounded-full bg-rose-400/70" />
         <span className="w-2 h-2 rounded-full bg-amber-300/70" />
@@ -200,7 +200,7 @@ export function CreditPreview() {
     <Frame label="P(default | x)">
       {creditDots.map((d, i) => (
         <motion.span key={i}
-          className={`absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full ${d.def ? 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.9)]' : 'bg-sky-300 shadow-[0_0_6px_rgba(125,211,252,0.9)]'}`}
+          className={`absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full ${d.def ? 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.9)]' : 'bg-accent shadow-[0_0_6px_var(--glow)]'}`}
           style={{ left: `${d.left}%`, top: `${d.top}%` }}
           initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: 1, scale: 1 }} viewport={inView}
           transition={loop(i * 0.04, 0.4)} />
@@ -221,10 +221,10 @@ export function MortalityPreview({ height }) {
   return (
     <Frame label="qₓ by age" height={height}>
       <Svg>
-        <DrawPath d={toPath(mortCurve(0))} color="#22d3ee" />
-        <DrawPath d={toPath(mortCurve(5))} color="#818cf8" dashed delay={0.4} />
+        <DrawPath d={toPath(mortCurve(0))} color="var(--accent)" />
+        <DrawPath d={toPath(mortCurve(5))} color="var(--fg)" dashed delay={0.4} />
       </Svg>
-      <div className="absolute bottom-1 inset-x-2 flex justify-between font-mono text-[9px] text-slate-500">
+      <div className="absolute bottom-1 inset-x-2 flex justify-between font-mono text-[9px] text-faint">
         <span>0</span><span>50</span><span>100</span>
       </div>
     </Frame>
@@ -244,23 +244,23 @@ export function ClaimsPreview() {
       <div className="absolute inset-0 flex gap-2 p-2 pt-7">
         <div className="flex flex-col gap-1.5 w-[28%]">
           {['Loss ratio', 'Reserves', 'Claims'].map((k, i) => (
-            <motion.div key={k} className="flex-1 rounded border border-white/10 bg-white/[0.04] px-1.5 py-1"
+            <motion.div key={k} className="flex-1 rounded border border-line bg-subtle px-1.5 py-1"
               initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={inView}
               transition={loop(i * 0.12, 0.5)}>
-              <p className="text-[8px] text-slate-500 leading-none">{k}</p>
-              <div className="mt-1 h-1.5 w-3/4 rounded-full bg-gradient-to-r from-sky-400/70 to-cyan-300/30" />
+              <p className="text-[8px] text-faint leading-none">{k}</p>
+              <div className="mt-1 h-1.5 w-3/4 rounded-full bg-gradient-to-r from-accent/70 to-accent-2/30" />
             </motion.div>
           ))}
         </div>
         <div className="relative flex-1">
           <div className="absolute inset-0 flex items-end gap-[3px]">
             {claimBars.map((h, i) => (
-              <motion.div key={i} className="flex-1 rounded-t-sm bg-indigo-400/30 border-t border-indigo-300/70"
+              <motion.div key={i} className="flex-1 rounded-t-sm bg-accent/30 border-t border-accent/70"
                 initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={inView}
                 transition={loop(0.2 + i * 0.05, 0.7)} />
             ))}
           </div>
-          <Svg><DrawPath d={lossRatio} color="#22d3ee" delay={0.8} /></Svg>
+          <Svg><DrawPath d={lossRatio} color="var(--accent)" delay={0.8} /></Svg>
         </div>
       </div>
     </Frame>

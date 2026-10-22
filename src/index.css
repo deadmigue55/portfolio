@@ -1,17 +1,138 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+/* ════════════════════════════════════════════
+   Theme: Midnight and apricot
+   A complementary pair: deep navy (214°) and a near-white apricot (28°),
+   plus one orange accent. Dark and light mode swap the two.
+   Light is the default. Dark applies when the visitor's system asks for it,
+   or when they pick it with the toggle (data-theme on <html>).
+   ════════════════════════════════════════════ */
+
+:root {
+  --bg: #FFF4EA;
+  --fg: #07162B;
+  --accent: #B84A00;
+  --accent-2: #E0701A;
+  --on-accent: #FFF4EA;
+  --good: #0B7A4B;
+
+  --soft:   color-mix(in srgb, var(--fg) 84%, var(--bg));
+  --muted:  color-mix(in srgb, var(--fg) 72%, var(--bg));
+  --faint:  color-mix(in srgb, var(--fg) 62%, var(--bg));
+  --line:   color-mix(in srgb, var(--fg) 14%, var(--bg));
+  --card:   color-mix(in srgb, var(--fg) 5%, var(--bg));
+  --card-2: color-mix(in srgb, var(--fg) 9%, var(--bg));
+  --subtle: color-mix(in srgb, var(--fg) 6%, var(--bg));
+
+  /* Glows: strong in dark mode, only a hint in light mode */
+  --glow:      rgba(184, 74, 0, 0.22);
+  --glow-soft: rgba(184, 74, 0, 0.10);
+  --pool-1:    rgba(184, 74, 0, 0.06);
+  --pool-2:    rgba(184, 74, 0, 0.05);
+  --spot:      rgba(184, 74, 0, 0.10);
+  --sheen:     rgba(255, 244, 234, 0.28);
+
+  /* Floating math symbols */
+  --sym-a: #B84A00;
+  --sym-b: #07162B;
+  --sym-c: #E0701A;
+  --sym-core: var(--accent);
+  --sym-glow: 30%;
+  --sym-opacity: 0.5;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #07162B;
+    --fg: #FFF4EA;
+    --accent: #FF8A3D;
+    --accent-2: #FFC08A;
+    --on-accent: #07162B;
+    --good: #3DDC97;
+    --glow:      rgba(255, 138, 61, 0.50);
+    --glow-soft: rgba(255, 138, 61, 0.22);
+    --pool-1:    rgba(255, 138, 61, 0.15);
+    --pool-2:    rgba(255, 244, 234, 0.05);
+    --spot:      rgba(255, 138, 61, 0.13);
+    --sheen:     rgba(255, 244, 234, 0.35);
+    --sym-a: #FF8A3D;
+    --sym-b: #FFB27A;
+    --sym-c: #FFD1A8;
+    --sym-core: #FFF4EA;
+    --sym-glow: 100%;
+    --sym-opacity: 1;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #07162B;
+  --fg: #FFF4EA;
+  --accent: #FF8A3D;
+  --accent-2: #FFC08A;
+  --on-accent: #07162B;
+  --good: #3DDC97;
+  --glow:      rgba(255, 138, 61, 0.50);
+  --glow-soft: rgba(255, 138, 61, 0.22);
+  --pool-1:    rgba(255, 138, 61, 0.15);
+  --pool-2:    rgba(255, 244, 234, 0.05);
+  --spot:      rgba(255, 138, 61, 0.13);
+  --sheen:     rgba(255, 244, 234, 0.35);
+  --sym-a: #FF8A3D;
+  --sym-b: #FFB27A;
+  --sym-c: #FFD1A8;
+  --sym-core: #FFF4EA;
+  --sym-glow: 100%;
+  --sym-opacity: 1;
+  color-scheme: dark;
+}
+
+/* Tailwind color names: bg-bg, text-fg, text-muted, border-line, bg-accent, ... */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-soft: var(--soft);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-on-accent: var(--on-accent);
+  --color-good: var(--good);
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
 
 * { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0a0a0f;
-  color: #e2e8f0;
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+::selection { background: var(--accent); color: var(--on-accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 /* ════════════════════════════════════════════
-   Neon background (NeonSymbols.jsx)
+   Floating background (NeonSymbols.jsx)
    --bg-glow / --bg-flash / --bg-amp are set from
    scroll position: 1 at the top, smaller further down.
    ════════════════════════════════════════════ */
@@ -23,13 +144,13 @@ body {
   overflow: hidden;
   pointer-events: none;
   user-select: none;
-  opacity: var(--bg-glow, 1);
+  opacity: calc(var(--bg-glow, 1) * var(--sym-opacity, 1));
 }
 
-/* Blue shades */
-.ns-tone-electric { --c: #00d4ff; --core: #e6faff; }
-.ns-tone-sky      { --c: #3b9eff; --core: #e3f0ff; }
-.ns-tone-cobalt   { --c: #2f6bff; --core: #dde7ff; }
+/* Symbol tones */
+.ns-tone-electric { --c: var(--sym-a); --core: var(--sym-core); }
+.ns-tone-sky      { --c: var(--sym-b); --core: var(--sym-core); }
+.ns-tone-cobalt   { --c: var(--sym-c); --core: var(--sym-core); }
 
 /* Movement: slow wandering paths, scaled by --bg-amp */
 .ns-drift {
@@ -65,10 +186,9 @@ body {
   display: block;
   color: var(--core);
   text-shadow:
-    0 0 2px #fff,
-    0 0 8px var(--c),
-    0 0 20px var(--c),
-    0 0 44px var(--c);
+    0 0 8px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 20px color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 44px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
 }
 
 /* Steady layer: slow breathing */
@@ -82,20 +202,19 @@ body {
   50%      { opacity: 0.7; }
 }
 
-/* Flash layer: neon tube flickering on, then fading */
+/* Flash layer: a tube flickering on, then fading */
 .ns-flash-wrap {
   position: absolute;
   inset: 0;
   opacity: var(--bg-flash, 1);
 }
 .ns-flash {
-  color: #f4fcff;
+  color: var(--core);
   text-shadow:
-    0 0 4px #fff,
-    0 0 12px var(--c),
-    0 0 30px var(--c),
-    0 0 70px var(--c),
-    0 0 120px var(--c);
+    0 0 12px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 30px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 70px  color-mix(in srgb, var(--c) var(--sym-glow), transparent),
+    0 0 120px color-mix(in srgb, var(--c) var(--sym-glow), transparent);
   opacity: 0;
   animation: ns-flicker var(--flash, 10s) linear var(--fd, 0s) infinite;
   will-change: opacity;
@@ -111,7 +230,7 @@ body {
   82%, 100% { opacity: 0; }
 }
 
-/* Soft blue light pools that slowly breathe */
+/* Soft light pools that slowly breathe */
 .ns-ambient {
   position: absolute;
   border-radius: 9999px;
@@ -121,13 +240,13 @@ body {
 .ns-ambient-1 {
   top: -10%; left: -10%;
   width: 55vw; height: 55vw;
-  background: radial-gradient(circle, rgba(0, 150, 255, 0.16), transparent 65%);
+  background: radial-gradient(circle, var(--pool-1), transparent 65%);
   animation: ns-ambient 14s ease-in-out infinite;
 }
 .ns-ambient-2 {
   bottom: -15%; right: -10%;
   width: 50vw; height: 50vw;
-  background: radial-gradient(circle, rgba(47, 107, 255, 0.14), transparent 65%);
+  background: radial-gradient(circle, var(--pool-2), transparent 65%);
   animation: ns-ambient 18s ease-in-out -7s infinite;
 }
 @keyframes ns-ambient {
@@ -143,7 +262,7 @@ body {
 }
 
 /* ════════════════════════════════════════════
-   Neon accents (used across sections)
+   Accents (used across sections)
    ════════════════════════════════════════════ */
 
 /* Lets the conic gradient angle animate smoothly */
@@ -155,14 +274,15 @@ body {
 @keyframes neon-spin  { to { --neon-angle: 360deg; } }
 @keyframes neon-slide { to { background-position: 300% 0; } }
 @keyframes neon-breathe {
-  0%, 100% { box-shadow: 0 0 6px rgba(0, 212, 255, 0.6), 0 0 14px rgba(0, 212, 255, 0.25); }
-  50%      { box-shadow: 0 0 10px rgba(0, 212, 255, 0.9), 0 0 26px rgba(0, 212, 255, 0.45); }
+  0%, 100% { box-shadow: 0 0 6px var(--glow), 0 0 14px var(--glow-soft); }
+  50%      { box-shadow: 0 0 10px var(--glow), 0 0 26px var(--glow); }
 }
 
 /* Small uppercase label above section headings */
 .neon-eyebrow {
-  color: #7dd3fc;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.65), 0 0 20px rgba(56, 189, 248, 0.3);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  text-shadow: 0 0 10px var(--glow-soft);
 }
 
 /* Animated light bar under section headings */
@@ -171,13 +291,13 @@ body {
   height: 3px;
   width: 72px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #00d4ff, #3b82f6, #8b5cf6, #22d3ee, #00d4ff);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent), var(--accent-2), var(--accent));
   background-size: 300% 100%;
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.55);
+  box-shadow: 0 0 12px var(--glow-soft);
   animation: neon-slide 6s linear infinite;
 }
 
-/* Spinning chroma border + outer glow on hover */
+/* Spinning border + outer glow on hover */
 .neon-ring {
   position: relative;
   isolation: isolate;
@@ -188,7 +308,7 @@ body {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: conic-gradient(from var(--neon-angle), #00d4ff, #3b82f6, #8b5cf6, #22d3ee, #00d4ff);
+  background: conic-gradient(from var(--neon-angle), var(--accent), var(--accent-2), var(--fg), var(--accent-2), var(--accent));
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
@@ -208,27 +328,27 @@ body {
 .neon-ring:hover::before,
 .neon-ring:focus-within::before { opacity: 1; }
 .neon-ring:hover::after,
-.neon-ring:focus-within::after  { opacity: 0.4; }
+.neon-ring:focus-within::after  { opacity: 0.3; }
 
 /* Glowing timeline / status dots */
-.neon-dot { background: #00d4ff; animation: neon-breathe 3s ease-in-out infinite; }
+.neon-dot { background: var(--accent); animation: neon-breathe 3s ease-in-out infinite; }
 
-/* Hero surname: shifting blue gradient with a glow */
+/* Hero surname: a slow gradient between the two apricot tones */
 .neon-name {
-  background: linear-gradient(90deg, #a5b4fc, #22d3ee, #3b82f6, #818cf8, #a5b4fc);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent), var(--accent-2), var(--accent));
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.35));
+  filter: drop-shadow(0 0 18px var(--glow-soft));
   animation: neon-slide 10s linear infinite;
 }
 
 /* Nav links light up on hover */
 .nav-link { transition: color 0.2s, text-shadow 0.2s; }
 .nav-link:hover {
-  color: #e0f2fe;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.8), 0 0 18px rgba(56, 189, 248, 0.4);
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--glow-soft);
 }
 
 /* Cursor spotlight in the hero (mouse/trackpad only) */
@@ -238,7 +358,7 @@ body {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 40%), rgba(0, 180, 255, 0.11), transparent 70%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 40%), var(--spot), transparent 70%);
 }
 @media (hover: hover) {
   .hero-spotlight.is-on { opacity: 1; }

@@ -45,21 +45,21 @@ const Icon = {
 }
 
 /* ── Preview "images": small mockups of each channel ── */
-const previewBox = 'relative h-44 overflow-hidden rounded-t-2xl border-b border-white/5 bg-gradient-to-br from-[#0b1a33] via-[#0a0f1f] to-[#0a0a12] p-5'
+const previewBox = 'relative h-44 overflow-hidden rounded-t-2xl border-b border-line bg-gradient-to-br from-card-2 to-card p-5'
 
 function EmailPreview() {
   return (
     <div className={previewBox} aria-hidden="true">
-      <div className="rounded-lg border border-white/10 bg-[#0d1426]/90 shadow-[0_0_30px_rgba(0,180,255,0.12)] transition-transform duration-500 group-hover:-translate-y-1">
-        <div className="flex gap-1.5 px-3 py-2 border-b border-white/5">
+      <div className="rounded-lg border border-line bg-card shadow-[0_0_30px_var(--glow)] transition-transform duration-500 group-hover:-translate-y-1">
+        <div className="flex gap-1.5 px-3 py-2 border-b border-line">
           <span className="w-2 h-2 rounded-full bg-rose-400/70" />
           <span className="w-2 h-2 rounded-full bg-amber-300/70" />
           <span className="w-2 h-2 rounded-full bg-emerald-400/70" />
         </div>
         <div className="px-3 py-2.5 space-y-1.5 text-[11px]">
-          <p className="text-slate-500">To: <span className="text-sky-200">{EMAIL}</span></p>
-          <p className="text-slate-500">Subject: <span className="text-slate-200">Let's build something</span></p>
-          <p className="text-slate-300 pt-1">Hi Miguel, we'd love to chat about a role<span className="caret text-sky-300">|</span></p>
+          <p className="text-faint">To: <span className="text-fg">{EMAIL}</span></p>
+          <p className="text-faint">Subject: <span className="text-fg">Let's build something</span></p>
+          <p className="text-soft pt-1">Hi Miguel, we'd love to chat about a role<span className="caret text-accent">|</span></p>
         </div>
       </div>
     </div>
@@ -70,17 +70,17 @@ function WhatsAppPreview() {
   return (
     <div className={previewBox} aria-hidden="true">
       <div className="flex items-center gap-2 mb-3">
-        <span className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-400/40 grid place-items-center text-[10px] font-semibold text-emerald-200">MV</span>
+        <span className="w-7 h-7 rounded-full bg-good/20 border border-good/40 grid place-items-center text-[10px] font-semibold text-good">MV</span>
         <div className="leading-tight">
-          <p className="text-[11px] text-slate-200 font-medium">Miguel Vilchis</p>
-          <p className="text-[10px] text-emerald-300">online</p>
+          <p className="text-[11px] text-fg font-medium">Miguel Vilchis</p>
+          <p className="text-[10px] text-good">online</p>
         </div>
       </div>
       <div className="space-y-2 text-[11px]">
-        <p className="ml-auto w-fit max-w-[80%] rounded-lg rounded-tr-sm bg-emerald-600/30 border border-emerald-400/20 px-3 py-1.5 text-emerald-50 transition-transform duration-500 group-hover:-translate-x-1">
+        <p className="ml-auto w-fit max-w-[80%] rounded-lg rounded-tr-sm bg-good/30 border border-good/20 px-3 py-1.5 text-fg transition-transform duration-500 group-hover:-translate-x-1">
           Hi Miguel! Free for a quick call this week?
         </p>
-        <p className="w-fit max-w-[80%] rounded-lg rounded-tl-sm bg-white/5 border border-white/10 px-3 py-1.5 text-slate-200 transition-transform duration-500 group-hover:translate-x-1">
+        <p className="w-fit max-w-[80%] rounded-lg rounded-tl-sm bg-subtle border border-line px-3 py-1.5 text-fg transition-transform duration-500 group-hover:translate-x-1">
           Absolutely. Calling you now.
         </p>
       </div>
@@ -91,15 +91,15 @@ function WhatsAppPreview() {
 function LinkedInPreview() {
   return (
     <div className={previewBox} aria-hidden="true">
-      <div className="rounded-lg overflow-hidden border border-white/10 bg-[#0d1426]/90 transition-transform duration-500 group-hover:-translate-y-1">
-        <div className="h-10 bg-gradient-to-r from-sky-600/60 via-blue-600/50 to-indigo-600/50" />
+      <div className="rounded-lg overflow-hidden border border-line bg-card transition-transform duration-500 group-hover:-translate-y-1">
+        <div className="h-10 bg-gradient-to-r from-accent/60 to-accent-2/40" />
         <div className="px-3 pb-3 -mt-5 flex items-end gap-3">
-          <span className="w-11 h-11 rounded-full border-2 border-[#0d1426] bg-gradient-to-br from-sky-400 to-blue-700 grid place-items-center text-xs font-bold text-white shadow-[0_0_14px_rgba(56,189,248,0.5)]">MV</span>
+          <span className="w-11 h-11 rounded-full border-2 border-card bg-gradient-to-br from-accent to-accent-2 grid place-items-center text-xs font-bold text-on-accent shadow-[0_0_14px_var(--glow)]">MV</span>
           <div className="flex-1 min-w-0 leading-tight">
-            <p className="text-[12px] text-white font-semibold truncate">Miguel Vilchis</p>
-            <p className="text-[10px] text-slate-400 truncate">Actuary · Pricing &amp; Risk · Data &amp; AI</p>
+            <p className="text-[12px] text-fg font-semibold truncate">Miguel Vilchis</p>
+            <p className="text-[10px] text-muted truncate">Actuary · Pricing &amp; Risk · Data &amp; AI</p>
           </div>
-          <span className="shrink-0 rounded-full bg-sky-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Connect</span>
+          <span className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-semibold text-on-accent">Connect</span>
         </div>
       </div>
     </div>
@@ -113,18 +113,18 @@ const contribCells = Array.from({ length: 7 * 20 }, (_, i) => {
   return (row * 7 + col * 13 + row * col) % 5
 })
 const contribShade = [
-  'bg-white/[0.04]',
-  'bg-sky-900/80',
-  'bg-sky-700/80',
-  'bg-sky-500/80',
-  'bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.8)]',
+  'bg-subtle',
+  'bg-accent/20',
+  'bg-accent/40',
+  'bg-accent/65',
+  'bg-accent shadow-[0_0_6px_var(--glow)]',
 ]
 
 function GitHubPreview() {
   return (
     <div className={previewBox} aria-hidden="true">
       <div className="flex items-center gap-3 mb-4">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-sky-400/40 bg-sky-900/40 grid place-items-center text-xs font-bold text-sky-200 shadow-[0_0_14px_rgba(56,189,248,0.35)]">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-accent/15 grid place-items-center text-xs font-bold text-fg shadow-[0_0_14px_var(--glow)]">
           MV
           <img
             src={`https://github.com/${GITHUB_HANDLE}.png?size=80`}
@@ -135,8 +135,8 @@ function GitHubPreview() {
           />
         </div>
         <div className="leading-tight">
-          <p className="text-[12px] text-white font-semibold">{GITHUB_HANDLE}</p>
-          <p className="text-[10px] text-slate-400">Shipping projects in public</p>
+          <p className="text-[12px] text-fg font-semibold">{GITHUB_HANDLE}</p>
+          <p className="text-[10px] text-muted">Shipping projects in public</p>
         </div>
       </div>
       <div className="grid grid-flow-col grid-rows-7 gap-[3px] w-fit">
@@ -149,20 +149,20 @@ function GitHubPreview() {
 }
 
 /* ── Card shell ── */
-const cardClass = 'neon-ring group flex flex-col rounded-2xl border border-white/10 bg-[#0c0c14]/85 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1'
+const cardClass = 'neon-ring group flex flex-col rounded-2xl border border-line bg-card backdrop-blur-sm transition-all duration-300 hover:-translate-y-1'
 
 function CardBody({ icon, label, value, note, external }) {
   return (
     <div className="flex items-center gap-4 p-5">
-      <span className="w-11 h-11 shrink-0 rounded-xl border border-sky-400/20 bg-sky-500/10 grid place-items-center text-sky-300 group-hover:shadow-[0_0_18px_rgba(56,189,248,0.45)] transition-shadow">
+      <span className="w-11 h-11 shrink-0 rounded-xl border border-accent/20 bg-accent/10 grid place-items-center text-accent group-hover:shadow-[0_0_18px_var(--glow)] transition-shadow">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs uppercase tracking-wider text-slate-500 mb-0.5">{label}</p>
-        <p className="text-slate-100 text-base md:text-lg font-medium break-all group-hover:text-white">{value}</p>
-        {note && <p className="text-slate-400 text-sm mt-0.5">{note}</p>}
+        <p className="text-xs uppercase tracking-wider text-faint mb-0.5">{label}</p>
+        <p className="text-fg text-base md:text-lg font-medium break-all group-hover:text-fg">{value}</p>
+        {note && <p className="text-muted text-sm mt-0.5">{note}</p>}
       </div>
-      {external && <span className="text-slate-500 group-hover:text-sky-300 transition-colors">{Icon.arrow}</span>}
+      {external && <span className="text-faint group-hover:text-accent transition-colors">{Icon.arrow}</span>}
     </div>
   )
 }
@@ -194,11 +194,11 @@ function PhoneCard() {
       />
       <div className="flex gap-3 px-5 pb-5 -mt-1">
         <a href={`tel:${PHONE_TEL}`}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-sky-400/30 bg-sky-500/10 px-4 py-2.5 text-sm font-medium text-sky-200 hover:bg-sky-500/20 hover:shadow-[0_0_18px_rgba(56,189,248,0.35)] transition-all">
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-2.5 text-sm font-medium text-fg hover:bg-accent/20 hover:shadow-[0_0_18px_var(--glow)] transition-all">
           {Icon.phone} Call
         </a>
         <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-200 hover:bg-emerald-500/20 hover:shadow-[0_0_18px_rgba(52,211,153,0.35)] transition-all">
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-good/30 bg-good/10 px-4 py-2.5 text-sm font-medium text-good hover:bg-good/20 hover:shadow-[0_0_18px_var(--glow)] transition-all">
           {Icon.chat} WhatsApp
         </a>
       </div>

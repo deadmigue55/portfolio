@@ -25,25 +25,25 @@ export default function About() {
         <div className="grid md:grid-cols-2 gap-12">
 
           {/* Left: bio */}
-          <div className="space-y-5 text-slate-400 leading-relaxed">
+          <div className="space-y-5 text-muted leading-relaxed">
             <p>
               I'm an Actuarial Science graduate from UNAM working in pricing and risk analytics at{' '}
-              <span className="text-slate-200">SCOR</span>, one of the world's largest reinsurers.
+              <span className="text-fg">SCOR</span>, one of the world's largest reinsurers.
               My day-to-day is pricing models, reserving methods and actuarial data.
             </p>
             <p>
               Outside work, I build projects where{' '}
-              <span className="text-slate-200">quantitative finance</span>,{' '}
-              <span className="text-slate-200">machine learning</span> and{' '}
-              <span className="text-slate-200">AI</span> meet risk modeling. That's where an
+              <span className="text-fg">quantitative finance</span>,{' '}
+              <span className="text-fg">machine learning</span> and{' '}
+              <span className="text-fg">AI</span> meet risk modeling. That's where an
               actuarial background is a real edge. I'm also preparing for{' '}
-              <span className="text-slate-200">SOA Exam FM</span>.
+              <span className="text-fg">SOA Exam FM</span>.
             </p>
             <p>
               I'm looking for a fast-moving team (a startup, a fintech, anywhere the learning curve
               is steep) in Mexico City or remote.
             </p>
-            <p className="text-slate-500">
+            <p className="text-faint">
               Off the keyboard: lifting, and working through boulder problems, which is the same
               mindset as debugging, with more chalk.
             </p>
@@ -55,13 +55,13 @@ export default function About() {
               <div key={item.title} className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div className="neon-dot w-2 h-2 rounded-full mt-1.5 shrink-0"></div>
-                  {i < timeline.length - 1 && <div className="w-px flex-1 bg-gradient-to-b from-sky-400/40 to-white/5 mt-2"></div>}
+                  {i < timeline.length - 1 && <div className="w-px flex-1 bg-gradient-to-b from-accent/40 to-line mt-2"></div>}
                 </div>
                 <div className="pb-6">
-                  <span className="text-xs text-sky-300 font-medium">{item.year}</span>
-                  <h3 className="text-white font-semibold mt-1">{item.title}</h3>
-                  <p className="text-slate-500 text-sm">{item.org}</p>
-                  <p className="text-slate-400 text-sm mt-2 leading-relaxed">{item.desc}</p>
+                  <span className="text-xs text-accent font-medium">{item.year}</span>
+                  <h3 className="text-fg font-semibold mt-1">{item.title}</h3>
+                  <p className="text-faint text-sm">{item.org}</p>
+                  <p className="text-muted text-sm mt-2 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}

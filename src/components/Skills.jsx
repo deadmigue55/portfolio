@@ -67,10 +67,10 @@ const categories = [
 ]
 
 const colorMap = {
-  indigo: { tag: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20', header: 'text-indigo-400', glow: 'rgba(99,102,241,0.6)' },
-  violet: { tag: 'bg-violet-500/10 text-violet-300 border-violet-500/20', header: 'text-violet-400', glow: 'rgba(167,139,250,0.6)' },
-  cyan:   { tag: 'bg-cyan-500/10   text-cyan-300   border-cyan-500/20',   header: 'text-cyan-400',   glow: 'rgba(34,211,238,0.6)'  },
-  sky:    { tag: 'bg-sky-500/10    text-sky-300    border-sky-500/20',    header: 'text-sky-400',    glow: 'rgba(56,189,248,0.6)'  },
+  indigo: { tag: 'bg-accent/10 text-accent border-accent/20', header: 'text-accent', glow: 'var(--glow)' },
+  violet: { tag: 'bg-accent/10 text-accent border-accent/20', header: 'text-accent', glow: 'var(--glow)' },
+  cyan:   { tag: 'bg-accent/10   text-accent   border-accent/20',   header: 'text-accent',   glow: 'var(--glow)' },
+  sky:    { tag: 'bg-accent/10    text-accent    border-accent/20',    header: 'text-accent',    glow: 'var(--glow)' },
 }
 
 function NeonCard({ cat }) {
@@ -91,10 +91,10 @@ function NeonCard({ cat }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden p-6 rounded-xl border border-white/5 bg-[#0c0c14]/70 backdrop-blur-sm transition-all duration-300"
+      className="relative overflow-hidden p-6 rounded-xl border border-line bg-card backdrop-blur-sm transition-all duration-300"
       style={{
-        borderColor: hovered ? c.glow.replace('0.6', '0.35') : undefined,
-        boxShadow: hovered ? `0 0 30px ${c.glow.replace('0.6', '0.1')}, inset 0 0 30px ${c.glow.replace('0.6', '0.03')}` : undefined,
+        borderColor: hovered ? 'color-mix(in srgb, var(--accent) 45%, transparent)' : undefined,
+        boxShadow: hovered ? '0 0 30px var(--glow-soft), inset 0 0 30px var(--glow-soft)' : undefined,
       }}
     >
       {/* Mouse-following inner glow */}
@@ -103,7 +103,7 @@ function NeonCard({ cat }) {
         className="absolute inset-0 pointer-events-none rounded-xl transition-opacity duration-150"
         style={{
           opacity: hovered ? 1 : 0,
-          background: `radial-gradient(circle 140px at ${pos.x}px ${pos.y}px, ${c.glow.replace('0.6', '0.12')} 0%, transparent 70%)`,
+          background: `radial-gradient(circle 140px at ${pos.x}px ${pos.y}px, var(--glow-soft) 0%, transparent 70%)`,
         }}
       />
 
@@ -127,7 +127,7 @@ function NeonCard({ cat }) {
 
 export default function Skills() {
   return (
-    <section id="skills" className="py-28 px-6 bg-white/[0.015]">
+    <section id="skills" className="py-28 px-6 bg-subtle/40">
       <div className="max-w-5xl mx-auto">
 
         <SectionHeader eyebrow="Skills" title="What I bring to the table">
@@ -141,10 +141,10 @@ export default function Skills() {
         </div>
 
         {/* Certs / learning callout */}
-        <div className="neon-ring mt-10 p-5 rounded-xl border border-white/10 bg-[#0c0c14]/80 flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="neon-ring mt-10 p-5 rounded-xl border border-line bg-card flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1">
-            <p className="text-slate-200 font-medium">Currently leveling up</p>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-fg font-medium">Currently leveling up</p>
+            <p className="text-muted text-sm mt-1">
               SOA Exam FM · Building AI-powered apps with LLM APIs · Full-stack development with React
             </p>
           </div>

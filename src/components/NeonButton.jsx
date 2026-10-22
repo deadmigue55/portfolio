@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
  *
  * Props:
  *   href      — renders as <a> if provided, otherwise <button>
- *   variant   — 'primary' (solid indigo) | 'ghost' (outlined)
+ *   variant   — 'primary' (solid accent) | 'ghost' (outlined)
  *   children  — label
  *   className — extra classes
  */
@@ -21,13 +21,11 @@ export default function NeonButton({ href, variant = 'primary', children, classN
     setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
   }
 
-  const glowColor = variant === 'primary'
-    ? 'rgba(99,102,241,0.75)'   // indigo
-    : 'rgba(0,212,255,0.55)'    // cyan
+  const glowColor = variant === 'primary' ? 'var(--sheen)' : 'var(--glow)'
 
   const baseClass = variant === 'primary'
-    ? 'bg-indigo-600 border border-indigo-500 text-white'
-    : 'bg-white/5 border border-white/10 text-slate-300'
+    ? 'bg-accent border border-accent text-on-accent'
+    : 'bg-subtle border border-line text-soft'
 
   const sharedClass = `
     relative overflow-hidden px-6 py-3 rounded-lg text-sm font-medium
@@ -51,8 +49,8 @@ export default function NeonButton({ href, variant = 'primary', children, classN
   const ringStyle = hovered
     ? {
         boxShadow: variant === 'primary'
-          ? '0 0 15px rgba(99,102,241,0.6), 0 0 30px rgba(99,102,241,0.3), 0 0 60px rgba(99,102,241,0.15)'
-          : '0 0 15px rgba(0,212,255,0.4), 0 0 30px rgba(0,212,255,0.2)',
+          ? '0 0 15px var(--glow), 0 0 30px var(--glow-soft)'
+          : '0 0 15px var(--glow-soft), 0 0 30px var(--glow-soft)',
       }
     : {}
 
