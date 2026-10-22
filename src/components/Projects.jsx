@@ -1,259 +1,268 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
 import Reveal from './Reveal'
 import { BeamBorder, SpotLayer } from './Electric'
-import { CreditPreview, MortalityPreview, ClaimsPreview } from './Previews'
-
-const MORTALITY_REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
+import { useCopy } from '../i18n'
+import { DASHBOARD, REPORT, REPO } from '../links'
 
 /*
-  One card component for every project. The animated preview stays on the card; hovering (or
-  focusing with the keyboard, or tapping on a phone) opens a details layer that says what was
-  built, why it was needed, with what, and links to the repository.
-  To add a project: add an object below. `featured` makes it full width.
+  The flagship card shows what a visitor most wants to check: real screenshots of the live dashboard,
+  the four headline results (always visible, never behind a hover) and links to the live app, the report
+  and the code. The case study (what was built, why, with what) opens under it.
+  Projects that have not shipped are listed in "On the bench" with no mock-ups, so they never read as finished work.
+  To add a shipped project: add a card like the flagship. To add an idea: add an item to bench in the copy.
 */
-const projects = [
-  {
-    title: 'Mortality Table Builder',
-    featured: true,
-    status: 'Live',
-    kicker: 'Flagship project',
-    desc: `An end-to-end actuarial pipeline for Mexico. It rebuilds the mortality table from three million
-      registered deaths, then uses it the way an insurer or a reinsurer does: projection, an experience
-      study, pricing, stress tests and reinsurance.`,
-    tags: ['Python', 'R', 'SQL', 'Streamlit', 'Lee-Carter', 'Reinsurance', 'Quarto', 'Excel'],
-    Preview: MortalityPreview,
-    links: [
-      { label: 'Open the live dashboard', href: 'https://mortality-table-builder.streamlit.app/', primary: true },
-      { label: 'Methodology report (PDF)', href: `${MORTALITY_REPO}/blob/main/reports/methodology.pdf` },
-    ],
-    repo: MORTALITY_REPO,
-    details: {
-      whatTitle: 'What I built',
-      what: [
-        'Rebuilt Mexico’s mortality tables from 3 million registered deaths and the CONAPO population: completed late registrations, smoothed the rates, closed the old ages.',
-        'Projected mortality (Lee-Carter, CBD) and cross-checked it against an independent R implementation and a backtest.',
-        'Built an insurer-style experience study, validated by planting 15 known effects and recovering all 15.',
-        'Priced a term policy, stress-tested it against the pandemic and longevity, compared reinsurance treaties and priced a longevity swap.',
-        'Shipped it as a live dashboard, an Excel workbook with live formulas and an 11-page report.',
-      ],
-      why: 'Mexico’s regulatory table (CNSF 2013) is more than ten years old and mixes both sexes, so it is far too light for men: at 40 they die at 4.1 times its rate. Insurers’ own experience tables are private, and the pandemic broke every trend. This is a transparent, tested alternative built from official data.',
-      results: [
-        { value: '746k', label: 'excess deaths in 2020 to 2022, with four baselines' },
-        { value: '+60%', label: 'claims if 2021 repeated, against +51% in the regulator’s stress' },
-        { value: '15 / 15', label: 'planted effects recovered by the experience study' },
-        { value: '100', label: 'automated data checks, 320+ tests on every commit' },
-      ],
-      tech: [
-        'Python (pandas, NumPy, SciPy, statsmodels)', 'R (StMoMo)', 'SQL (SQLite warehouse)',
-        'Streamlit + Plotly', 'Quarto + Typst', 'Excel (live formulas)', 'GitHub Actions, pytest, ruff',
-      ],
-    },
-  },
-  {
-    title: 'Credit Risk Scoring Model',
-    status: 'In Progress',
-    desc: 'Machine learning pipeline that predicts the probability of credit default from financial and behavioral features. A logistic regression baseline compared against gradient boosting.',
-    tags: ['Python', 'sklearn', 'Pandas', 'Finance'],
-    Preview: CreditPreview,
-    repo: null,
-    details: {
-      whatTitle: 'What it is',
-      what: [
-        'A pipeline that predicts the probability a borrower defaults, from financial and behavioral features.',
-        'A transparent logistic regression baseline, compared against gradient boosting.',
-      ],
-      why: 'Lenders price and limit risk on the probability of default, so a model has to rank borrowers well and be explainable. Comparing a simple baseline with a stronger model shows what the extra complexity buys.',
-      tech: ['Python', 'scikit-learn', 'Pandas'],
-    },
-  },
-  {
-    title: 'Reinsurance Claims Dashboard',
-    status: 'Planned',
-    desc: 'Dashboard for analyzing reinsurance claims patterns, loss ratios and reserve development. Inspired by real reinsurance workflows.',
-    tags: ['Python', 'Plotly', 'Reinsurance', 'Data Viz'],
-    Preview: ClaimsPreview,
-    repo: null,
-    details: {
-      whatTitle: 'What it will be',
-      what: [
-        'A dashboard for claims patterns, loss ratios and reserve development.',
-        'Modelled on how reinsurance teams actually read their claims.',
-      ],
-      why: 'Reinsurers follow their business through loss ratios and how claims develop over time. A clear view of both is where reserving questions start.',
-      tech: ['Python', 'Plotly'],
-    },
-  },
+
+// Technologies carry the same names in both languages
+const TECH = [
+  'Python (pandas, NumPy, SciPy, statsmodels)', 'R (StMoMo)', 'SQL (SQLite warehouse)',
+  'Streamlit + Plotly', 'Quarto + Typst', 'Excel (live formulas)', 'GitHub Actions, pytest, ruff',
 ]
 
-const statusColor = {
-  'In Progress': 'bg-amber-500/10 text-amber-300 border-amber-500/25',
-  'Planned':     'bg-accent/10 text-accent border-accent/25',
-  'Live':        'bg-good/10 text-good border-good/25',
-}
+const SHOT_W = 1400
+const SHOT_H = 900
+const shot = file => `/img/dashboard-${file}.webp`
 
-const hoverCapable = () =>
-  typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
+const statusStyle = {
+  live: 'bg-good/10 text-good border-good/30',
+  progress: 'bg-accent/10 text-accent border-accent/30',
+  planned: 'bg-subtle text-muted border-line',
+}
 
 function Chip({ children }) {
   return <span className="text-xs text-soft bg-subtle border border-line px-2 py-0.5 rounded">{children}</span>
 }
 
-function Details({ p, wide, onClose }) {
-  const d = p.details
+const arrowIcon = (
+  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+)
+
+/* ── Lightbox: a native <dialog>, so focus, Escape and the backdrop behave like a real modal ── */
+function Lightbox({ items, index, setIndex, onClose, labels }) {
+  const ref = useRef(null)
+  const open = index !== null
+  const n = items.length
+
+  useEffect(() => {
+    const d = ref.current
+    if (!d) return
+    if (open && !d.open) d.showModal()
+    if (!open && d.open) d.close()
+  }, [open])
+
+  const go = useCallback(step => setIndex(i => (i + step + n) % n), [setIndex, n])
+  const onKey = e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(1) }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1) }
+  }
+  const item = items[index ?? 0]
+  const btn = 'grid size-10 place-items-center rounded-full border border-line bg-card/90 text-fg backdrop-blur transition-colors hover:border-accent hover:text-accent'
+
   return (
-    <div className={`h-full overflow-y-auto rounded-xl bg-bg p-5 ${wide ? 'lg:p-8' : ''}`}>
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <p className="neon-eyebrow text-[11px] font-medium tracking-widest uppercase">Quick view</p>
-          <h3 className="text-fg font-bold text-lg mt-1">{p.title}</h3>
+    <dialog ref={ref} onClose={onClose} onKeyDown={onKey}
+      onClick={e => { if (e.target === ref.current) onClose() }}
+      aria-label={item.title}
+      className="m-auto max-h-[96vh] w-[min(96vw,1100px)] max-w-none overflow-y-auto rounded-2xl border border-line bg-bg p-0 text-fg shadow-[0_30px_120px_rgba(0,0,0,0.5)] backdrop:bg-[rgba(7,22,43,0.78)] backdrop:backdrop-blur-sm">
+      {open && (
+        <div className="relative">
+          <img src={shot(item.file)} alt={item.alt} width={SHOT_W} height={SHOT_H} className="block h-auto max-h-[calc(96vh-4.5rem)] w-full rounded-t-2xl object-contain object-top" />
+          <div className="flex items-center justify-between gap-4 border-t border-line px-4 py-3">
+            <p className="text-sm text-soft"><span className="font-medium text-fg">{item.title}</span> · {labels.count(index + 1, n)}</p>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => go(-1)} aria-label={labels.prev} className={btn}>←</button>
+              <button type="button" onClick={() => go(1)} aria-label={labels.next} className={btn}>→</button>
+              <button type="button" onClick={onClose} aria-label={labels.close} className={btn}>✕</button>
+            </div>
+          </div>
         </div>
-        <button type="button" onClick={onClose}
-          className="[@media(hover:hover)]:hidden shrink-0 rounded-lg border border-line px-3 py-1 text-xs text-soft">
-          Close
+      )}
+    </dialog>
+  )
+}
+
+/* ── A browser window with the real dashboard in it, and tabs to switch pages ── */
+function BrowserShots({ labels }) {
+  const items = labels.items
+  const [current, setCurrent] = useState(0)
+  const [zoom, setZoom] = useState(null)
+  const item = items[current]
+
+  return (
+    <div role="group" aria-label={labels.browser} className="min-w-0">
+      <div className="overflow-hidden rounded-xl border border-line bg-bg shadow-[0_10px_50px_var(--glow-soft)]">
+        <div className="flex items-center gap-3 border-b border-line bg-card-2 px-3 py-2">
+          <span className="flex gap-1.5" aria-hidden="true">
+            <i className="size-2 rounded-full bg-rose-400/70" /><i className="size-2 rounded-full bg-amber-300/70" /><i className="size-2 rounded-full bg-emerald-400/70" />
+          </span>
+          <a href={DASHBOARD} target="_blank" rel="noopener noreferrer"
+            className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md bg-bg px-3 py-1 font-mono text-[10.5px] text-muted transition-colors hover:text-accent">
+            <span className="truncate">mortality-table-builder.streamlit.app</span>{arrowIcon}
+          </a>
+        </div>
+        <button type="button" onClick={() => setZoom(current)} aria-label={`${labels.open}: ${item.title}`}
+          className="group relative block w-full cursor-zoom-in overflow-hidden bg-white" style={{ aspectRatio: `${SHOT_W} / ${SHOT_H}` }}>
+          <AnimatePresence initial={false}>
+            <motion.img key={item.file} src={shot(item.file)} alt={item.alt} width={SHOT_W} height={SHOT_H} loading="lazy" decoding="async"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, position: 'absolute' }} transition={{ duration: 0.35 }}
+              className="block h-full w-full object-cover object-top" />
+          </AnimatePresence>
+          <span aria-hidden="true" className="absolute bottom-2 right-2 rounded-full border border-line bg-bg/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            {labels.open}
+          </span>
         </button>
       </div>
 
-      <div className={wide ? 'grid lg:grid-cols-3 gap-6' : 'space-y-4'}>
-        <section>
-          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">{d.whatTitle}</h4>
-          <ul className="space-y-2 text-[13px] leading-relaxed text-soft">
-            {d.what.map(w => (
-              <li key={w} className="flex gap-2"><span className="text-accent mt-1.5 size-1 shrink-0 rounded-full bg-accent" />{w}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section>
-          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">Why it was needed</h4>
-          <p className="text-[13px] leading-relaxed text-soft">{d.why}</p>
-          {d.results && (
-            <dl className="grid grid-cols-2 gap-2 mt-4">
-              {d.results.map(r => (
-                <div key={r.value} className="rounded-lg border border-line bg-subtle px-3 py-2">
-                  <dt className="text-base font-bold text-accent">{r.value}</dt>
-                  <dd className="text-[11px] text-muted leading-snug mt-0.5">{r.label}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </section>
-
-        <section>
-          <h4 className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">Built with</h4>
-          <div className="flex flex-wrap gap-1.5">
-            {d.tech.map(t => <Chip key={t}>{t}</Chip>)}
-          </div>
-          {p.repo
-            ? (
-              <a href={p.repo} target="_blank" rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-on-accent bg-accent hover:brightness-110 transition-colors">
-                Go deeper: the repository →
-              </a>
-            )
-            : <p className="mt-5 text-sm text-faint">The repository and write-up will be linked here when this ships.</p>}
-        </section>
+      <div className="mt-3 flex flex-wrap gap-1.5" role="tablist" aria-label={labels.browser}>
+        {items.map((it, i) => (
+          <button key={it.file} type="button" role="tab" aria-selected={i === current} onClick={() => setCurrent(i)}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              i === current ? 'border-accent/50 bg-accent/10 text-accent' : 'border-line text-muted hover:border-accent/40 hover:text-fg'}`}>
+            {it.title}
+          </button>
+        ))}
       </div>
+
+      <Lightbox items={items} index={zoom} setIndex={setZoom} onClose={() => setZoom(null)} labels={labels} />
     </div>
   )
 }
 
-function ProjectCard({ p }) {
-  const [open, setOpen] = useState(false)
-  const wide = !!p.featured
+/* ── The flagship ── */
+function Flagship() {
+  const c = useCopy().projects
+  const f = c.flagship
+  const [caseOpen, setCaseOpen] = useState(false)
+  const gallery = { ...c.gallery, browser: c.browserLabel }
 
-  // On phones there is no hover: a tap opens the details, "Close" shuts them.
-  const onCardClick = e => {
-    if (hoverCapable() || e.target.closest('a')) return
-    setOpen(o => !o)
-  }
-
-  const layer = open
-    ? 'opacity-100 pointer-events-auto'
-    : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
+  const button = 'group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-[transform,filter,border-color,box-shadow] duration-200 active:scale-95'
 
   return (
-    <article tabIndex={0} onClick={onCardClick} aria-label={`${p.title}: details on hover or focus`}
-      className={`spot-card group relative rounded-xl border border-line bg-card outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
-        wide ? 'grid lg:grid-cols-[1.05fr_1fr] lg:items-center lg:min-h-[34rem]' : 'hover:-translate-y-1 transition-transform duration-300 ease-out flex flex-col'}`}>
-
-      {wide && <BeamBorder />}
+    <article aria-labelledby="flagship-title" className="spot-card relative rounded-2xl border border-line bg-card">
+      <BeamBorder />
       <SpotLayer />
 
-      {/* Animated preview: the part that stays */}
-      <div className={wide ? 'p-5 lg:p-6' : 'p-6 pb-0'}>
-        <p.Preview height={wide ? 'h-56 lg:h-80' : undefined} />
+      <div className="grid grid-cols-1 gap-8 p-5 lg:grid-cols-[1.08fr_1fr] lg:items-center lg:gap-10 lg:p-8">
+        <BrowserShots labels={gallery} />
+
+        <div className="flex min-w-0 flex-col">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyle.live}`}>{c.status.live}</span>
+            <span className="text-xs uppercase tracking-widest text-faint">{f.kicker}</span>
+          </div>
+
+          <h3 id="flagship-title" className="mb-3 text-2xl font-bold text-fg">{f.title}</h3>
+          <p className="text-sm leading-relaxed text-muted">{f.desc}</p>
+
+          {/* The four numbers: always visible */}
+          <dl className="mt-5 grid grid-cols-2 gap-2">
+            {f.results.map(r => (
+              <div key={r.value} className="rounded-lg border border-line bg-subtle px-3 py-2.5">
+                <dt className="font-mono text-lg font-medium text-accent">{r.value}</dt>
+                <dd className="mt-0.5 text-[11.5px] leading-snug text-muted">{r.label}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Magnetic strength={0.2} max={7}>
+              <a href={DASHBOARD} target="_blank" rel="noopener noreferrer"
+                className={`${button} bg-accent text-on-accent hover:brightness-110 hover:shadow-[0_0_20px_var(--glow)]`}>
+                {f.linkDashboard}
+                <span aria-hidden="true" className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">→</span>
+              </a>
+            </Magnetic>
+            <Magnetic strength={0.2} max={7}>
+              <a href={REPORT} target="_blank" rel="noopener noreferrer"
+                className={`${button} border border-line text-fg hover:border-accent/60`}>{f.linkReport}</a>
+            </Magnetic>
+          </div>
+
+          <button type="button" onClick={() => setCaseOpen(o => !o)} aria-expanded={caseOpen} aria-controls="flagship-case"
+            className="mt-5 inline-flex w-fit items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-accent transition-colors hover:text-fg">
+            {caseOpen ? c.caseClose : c.caseOpen}
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+              className={`transition-transform duration-300 ${caseOpen ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
+          </button>
+        </div>
       </div>
 
-      <div className={`flex flex-col ${wide ? 'p-6 lg:p-8' : 'p-6 flex-1'}`}>
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${statusColor[p.status]}`}>{p.status}</span>
-          {p.kicker && <span className="text-xs uppercase tracking-widest text-faint">{p.kicker}</span>}
+      {/* The case study: opens in place (grid-rows animates the height, nothing jumps) */}
+      <div id="flagship-case" role="region" aria-label={f.title}
+        className={`grid transition-[grid-template-rows] duration-500 ease-out ${caseOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden" inert={!caseOpen}>
+          <div className="grid grid-cols-1 gap-8 border-t border-line p-5 lg:grid-cols-3 lg:p-8">
+            <section>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-accent">{f.whatTitle}</h4>
+              <ul className="space-y-2.5 text-[13.5px] leading-relaxed text-soft">
+                {f.what.map(w => (
+                  <li key={w} className="flex gap-2.5"><span className="mt-2 size-1 shrink-0 rounded-full bg-accent" />{w}</li>
+                ))}
+              </ul>
+            </section>
+            <section>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-accent">{c.whyTitle}</h4>
+              <p className="text-[13.5px] leading-relaxed text-soft">{f.why}</p>
+            </section>
+            <section>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-accent">{c.builtWith}</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {TECH.map(t => <Chip key={t}>{t}</Chip>)}
+              </div>
+              <a href={REPO} target="_blank" rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent transition-[filter] hover:brightness-110">
+                {c.goDeeper}
+              </a>
+            </section>
+          </div>
         </div>
-
-        <h3 className={`text-fg font-semibold mb-2 ${wide ? 'text-2xl font-bold mb-3' : ''}`}>{p.title}</h3>
-        <p className="text-muted text-sm leading-relaxed flex-1">{p.desc}</p>
-
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          {p.tags.map(t => (
-            <span key={t} className="text-xs text-muted bg-subtle px-2 py-0.5 rounded">{t}</span>
-          ))}
-        </div>
-
-        {p.links
-          ? (
-            <div className="flex flex-wrap gap-3 mt-6">
-              {p.links.map(l => (
-                <Magnetic key={l.href} strength={0.2} max={7}>
-                  <a href={l.href} target="_blank" rel="noopener noreferrer"
-                    className={`group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-[transform,filter,border-color,box-shadow] duration-200 active:scale-95 ${l.primary
-                      ? 'text-on-accent bg-accent hover:brightness-110 hover:shadow-[0_0_20px_var(--glow)]'
-                      : 'text-fg border border-line hover:border-accent/60'}`}>
-                    {l.label}
-                    {l.primary && <span aria-hidden="true" className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">→</span>}
-                  </a>
-                </Magnetic>
-              ))}
-            </div>
-          )
-          : <span className="mt-5 text-sm text-faint">Write-up coming soon</span>}
-
-        <p className="mt-5 text-[11px] uppercase tracking-widest text-faint group-hover:text-accent transition-colors">
-          <span className="hidden [@media(hover:hover)]:inline">Hover</span>
-          <span className="[@media(hover:hover)]:hidden">Tap</span> for the quick view
-        </p>
-      </div>
-
-      {/* Details layer */}
-      <div className={`absolute inset-0 z-10 transition-opacity duration-300 ${layer}`}>
-        <Details p={p} wide={wide} onClose={e => { e.stopPropagation(); setOpen(false) }} />
       </div>
     </article>
   )
 }
 
-export default function Projects() {
+/* ── Ideas that have not shipped: listed plainly, no mock-ups ── */
+function Bench() {
+  const c = useCopy().projects
   return (
-    <section id="projects" className="py-28 px-6">
+    <div className="mt-14">
+      <h3 className="font-mono text-[11px] uppercase tracking-[0.24em] text-accent">{c.bench.title}</h3>
+      <p className="mt-2 max-w-xl text-sm text-muted">{c.bench.intro}</p>
+      <ul className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+        {c.bench.items.map((p, i) => (
+          <Reveal as="li" key={p.title} delay={i * 0.1}>
+            <div className="spot-card relative h-full rounded-xl border border-dashed border-line bg-card/60 p-5">
+              <SpotLayer />
+              <div className="relative z-10">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h4 className="font-semibold text-fg">{p.title}</h4>
+                  <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusStyle[p.status]}`}>{c.status[p.status]}</span>
+                </div>
+                <p className="text-sm leading-relaxed text-muted">{p.desc}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {p.tags.map(t => <span key={t} className="rounded bg-subtle px-2 py-0.5 text-xs text-muted">{t}</span>)}
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+export default function Projects() {
+  const c = useCopy().projects
+  return (
+    <section id="projects" aria-labelledby="projects-title" className="py-28 px-6">
       <div className="max-w-5xl mx-auto">
+        <SectionHeader id="projects-title" eyebrow={c.eyebrow} title={c.title}>{c.intro}</SectionHeader>
 
-        <SectionHeader eyebrow="Projects" title="Things I'm building">
-          In-depth projects that put actuarial knowledge to work with data science and AI.
-          Hover a card for the quick view: what was built, why it was needed and how.
-        </SectionHeader>
+        <Reveal><Flagship /></Reveal>
+        <Bench />
 
-        <div className="grid md:grid-cols-2 gap-5">
-          {projects.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.12} className={p.featured ? 'md:col-span-2' : 'h-full'}>
-              <ProjectCard p={p} />
-            </Reveal>
-          ))}
-        </div>
-
-        <p className="text-faint text-sm mt-8">
-          More projects are in the pipeline. This page grows as they ship.
-        </p>
+        <p className="text-faint text-sm mt-10">{c.more}</p>
       </div>
     </section>
   )

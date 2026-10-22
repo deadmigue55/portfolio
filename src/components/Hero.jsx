@@ -4,6 +4,9 @@ import NeonButton from './NeonButton'
 import HeroScene from './HeroScene'
 import Reveal from './Reveal'
 import { BeamBorder } from './Electric'
+import { useCopy, rich } from '../i18n'
+import { useMotionPref } from '../motion-pref'
+import { DASHBOARD, REPORT, REPO } from '../links'
 
 const rise = { duration: 1, ease: [0.22, 1, 0.36, 1] }
 
@@ -11,29 +14,37 @@ const rise = { duration: 1, ease: [0.22, 1, 0.36, 1] }
 // (mono for the instruction, the serif italic of the surname for the invitation).
 // It fades away as soon as the visitor starts scrolling, and a click jumps to the next section.
 function ScrollCue() {
+  const c = useCopy().hero
+  const { reduced } = useMotionPref()
   const { scrollY } = useScroll()
   const opacity = useTransform(scrollY, [0, 140], [1, 0])
   const lift = useTransform(scrollY, [0, 140], [0, 14])
   return (
-    <motion.a href="#about" style={{ opacity, y: lift }}
-      aria-label="Scroll down to the About section"
-      className="group mt-16 inline-flex items-center gap-4 outline-none">
+    <motion.a href="#projects" style={{ opacity, y: lift }}
+      aria-label={c.scrollAria}
+      className="group mt-12 inline-flex items-center gap-4 outline-none">
       <span aria-hidden="true"
         className="relative flex h-12 w-7 justify-center rounded-full border border-line pt-2.5 transition-colors duration-300 group-hover:border-accent group-focus-visible:border-accent">
         <motion.span className="block h-2 w-1 rounded-full bg-accent"
-          animate={{ y: [0, 16], opacity: [1, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 0.5, ease: [0.45, 0, 0.2, 1] }} />
+          animate={reduced ? { y: 4, opacity: 1 } : { y: [0, 16], opacity: [1, 0] }}
+          transition={reduced ? { duration: 0 } : { duration: 1.6, repeat: Infinity, repeatDelay: 0.5, ease: [0.45, 0, 0.2, 1] }} />
       </span>
       <span className="flex flex-col leading-none transition-transform duration-300 ease-out group-hover:translate-x-1">
-        <span className="font-mono text-[11px] uppercase tracking-[0.26em] text-accent">Scroll</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.26em] text-accent">{c.scrollLabel}</span>
         <span className="mt-2 text-xl italic text-soft transition-colors duration-300 group-hover:text-fg"
-          style={{ fontFamily: 'Instrument Serif, serif' }}>to explore</span>
+          style={{ fontFamily: 'Instrument Serif, serif' }}>{c.scrollSub}</span>
       </span>
     </motion.a>
   )
 }
 
+const external = 'inline-flex items-center gap-1.5 text-sm text-soft underline decoration-line decoration-1 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent'
+const Arrow = () => (
+  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+)
+
 export default function Hero() {
+  const c = useCopy().hero
   const spotRef = useRef(null)
   // Scroll parallax: the chart sinks and shrinks a little, the copy drifts up, as the page moves on
   const { scrollY } = useScroll()
@@ -81,7 +92,7 @@ export default function Hero() {
           <div className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-medium">
             <BeamBorder slow />
             <span className="neon-dot w-1.5 h-1.5 rounded-full"></span>
-            Open to new opportunities · Mexico City / Remote
+            {c.badge}
           </div>
         </Reveal>
 
@@ -104,29 +115,35 @@ export default function Hero() {
         {/* Tagline */}
         <Reveal delay={0.45} y={14}>
         <p className="text-xl md:text-2xl text-soft font-light mb-4 max-w-2xl">
-          Actuary · Pricing &amp; Risk · Data &amp; AI
+          {c.tagline}
         </p>
         </Reveal>
 
+        {/* The one-sentence proof, then who and where */}
         <Reveal delay={0.55} y={14}>
-        <p className="text-muted max-w-xl leading-relaxed mb-10">
-          Actuarial Science graduate from{' '}
-          <span className="text-fg">Facultad de Ciencias, UNAM</span>, working in pricing and
-          risk analytics at <span className="text-fg">SCOR</span>, one of the world's largest
-          reinsurers. I build tools that combine probability theory, machine learning and AI to
-          price, model and explain risk.
-        </p>
+        <p className="mb-4 max-w-xl text-lg leading-snug text-fg">{rich(c.proof)}</p>
+        <p className="text-muted max-w-xl leading-relaxed mb-8">{rich(c.bio)}</p>
         </Reveal>
 
-        {/* LED Neon CTAs */}
+        {/* CTAs */}
         <Reveal delay={0.7} y={14}>
         <div className="flex flex-wrap gap-4">
           <NeonButton href="#projects" variant="primary" arrow>
-            View Projects
+            {c.ctaProjects}
           </NeonButton>
           <NeonButton href="#contact" variant="ghost">
-            Get in Touch
+            {c.ctaContact}
           </NeonButton>
+        </div>
+
+        {/* Verifiable in one click */}
+        <div className="mt-7">
+          <p className="mb-2.5 font-mono text-[10.5px] uppercase tracking-[0.2em] text-faint">{c.quick.label}</p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <a href={DASHBOARD} target="_blank" rel="noopener noreferrer" className={external}>{c.quick.dashboard} <Arrow /></a>
+            <a href={REPORT} target="_blank" rel="noopener noreferrer" className={external}>{c.quick.report} <Arrow /></a>
+            <a href={REPO} target="_blank" rel="noopener noreferrer" className={external}>{c.quick.code} <Arrow /></a>
+          </div>
         </div>
         </Reveal>
 

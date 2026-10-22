@@ -4,13 +4,8 @@ import Reveal from './Reveal'
 import CopyButton from './CopyButton'
 import { SpotLayer } from './Electric'
 import { PlayBox } from './Previews'
-
-const EMAIL = 'migue.vilchis@ciencias.unam.mx'
-const PHONE_DISPLAY = '+1 (913) 707-0185'
-const PHONE_TEL = '+19137070185'
-const WHATSAPP_URL = 'https://wa.me/19137070185'
-const LINKEDIN_HANDLE = 'deadmigue'
-const GITHUB_HANDLE = 'deadmigue55'
+import { useCopy } from '../i18n'
+import { EMAIL, PHONE_DISPLAY, PHONE_TEL, WHATSAPP, LINKEDIN, LINKEDIN_HANDLE, GITHUB, GITHUB_HANDLE } from '../links'
 
 /* ── Icons ── */
 const Icon = {
@@ -54,11 +49,11 @@ const previewBox = 'relative h-44 overflow-hidden rounded-t-2xl border-b border-
 const d = seconds => ({ '--d': `${seconds}s` })
 const typed = (text, start) => ({ '--w': `${text.length}ch`, '--n': text.length, '--t': `${text.length * 0.035}s`, '--d': `${start}s` })
 
-const SUBJECT = "Let's build something"
-const BODY = "Hi Miguel, we'd love to chat about a role"
-
 // The message writes itself, then "sends"
 function EmailPreview() {
+  const p = useCopy().contact.emailPreview
+  const SUBJECT = p.subject
+  const BODY = p.body
   return (
     <PlayBox className={previewBox}>
       <div className="rounded-lg border border-line bg-card shadow-[0_0_30px_var(--glow)] transition-transform duration-500 group-hover:-translate-y-1">
@@ -68,12 +63,12 @@ function EmailPreview() {
           <span className="w-2 h-2 rounded-full bg-emerald-400/70" />
           <span className="pv-slide ml-auto flex items-center gap-1 text-[10px] font-medium text-good" style={d(4.3)}>
             <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-            Sent
+            {p.sent}
           </span>
         </div>
         <div className="px-3 py-2.5 space-y-1.5 font-mono text-[11px]">
-          <p className="text-faint whitespace-nowrap">To: <span className="pv-type inline-block align-bottom text-fg" style={typed(EMAIL, 0.3)}>{EMAIL}</span></p>
-          <p className="text-faint whitespace-nowrap">Subject: <span className="pv-type inline-block align-bottom text-fg" style={typed(SUBJECT, 1.5)}>{SUBJECT}</span></p>
+          <p className="text-faint whitespace-nowrap">{p.to} <span className="pv-type inline-block align-bottom text-fg" style={typed(EMAIL, 0.3)}>{EMAIL}</span></p>
+          <p className="text-faint whitespace-nowrap">{p.subjectLabel} <span className="pv-type inline-block align-bottom text-fg" style={typed(SUBJECT, 1.5)}>{SUBJECT}</span></p>
           <p className="pt-1 text-soft whitespace-nowrap">
             <span className="pv-type inline-block align-bottom" style={typed(BODY, 2.4)}>{BODY}</span>
             <span className="pv-caret inline-block h-3 w-1 translate-y-0.5 bg-accent" style={d(2.4)} />
@@ -86,18 +81,19 @@ function EmailPreview() {
 
 // A message arrives, a typing indicator shows, then the reply
 function WhatsAppPreview() {
+  const p = useCopy().contact.chatPreview
   return (
     <PlayBox className={previewBox}>
       <div className="pv-fade flex items-center gap-2 mb-3" style={d(0.1)}>
         <span className="w-7 h-7 rounded-full bg-good/20 border border-good/40 grid place-items-center text-[10px] font-semibold text-good">MV</span>
         <div className="leading-tight">
           <p className="text-[11px] text-fg font-medium">Miguel Vilchis</p>
-          <p className="text-[10px] text-good">online</p>
+          <p className="text-[10px] text-good">{p.online}</p>
         </div>
       </div>
       <div className="space-y-2 text-[11px]">
         <p className="pv-slide ml-auto w-fit max-w-[80%] rounded-lg rounded-tr-sm bg-good/30 border border-good/20 px-3 py-1.5 text-fg" style={d(0.5)}>
-          Hi Miguel! Free for a quick call this week?
+          {p.in}
         </p>
         <div className="grid">
           <div className="pv-dots col-start-1 row-start-1 w-fit items-center gap-1 rounded-lg rounded-tl-sm border border-line bg-subtle px-3 py-2.5"
@@ -105,7 +101,7 @@ function WhatsAppPreview() {
             <i /><i /><i />
           </div>
           <p className="pv-slide col-start-1 row-start-1 w-fit max-w-[80%] rounded-lg rounded-tl-sm bg-subtle border border-line px-3 py-1.5 text-fg" style={d(2.9)}>
-            Absolutely. Calling you now.
+            {p.out}
           </p>
         </div>
       </div>
@@ -115,6 +111,7 @@ function WhatsAppPreview() {
 
 // The profile card lands, its banner shimmers and the Connect button keeps pulsing
 function LinkedInPreview() {
+  const c = useCopy().contact
   return (
     <PlayBox className={previewBox}>
       <div className="pv-slide rounded-lg overflow-hidden border border-line bg-card transition-transform duration-500 group-hover:-translate-y-1" style={d(0.2)}>
@@ -123,9 +120,9 @@ function LinkedInPreview() {
           <span className="w-11 h-11 rounded-full border-2 border-card bg-gradient-to-br from-accent to-accent-2 grid place-items-center text-xs font-bold text-on-accent shadow-[0_0_14px_var(--glow)]">MV</span>
           <div className="flex-1 min-w-0 leading-tight">
             <p className="text-[12px] text-fg font-semibold truncate">Miguel Vilchis</p>
-            <p className="text-[10px] text-muted truncate">Actuary · Pricing &amp; Risk · Data &amp; AI</p>
+            <p className="text-[10px] text-muted truncate">{c.linkedinHeadline}</p>
           </div>
-          <span className="pv-ping shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-semibold text-on-accent" style={d(1.8)}>Connect</span>
+          <span className="pv-ping shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-semibold text-on-accent" style={d(1.8)}>{c.connect}</span>
         </div>
       </div>
     </PlayBox>
@@ -148,6 +145,7 @@ const contribShade = [
 
 // The graph fills in column by column, then the brightest days keep twinkling
 function GitHubPreview() {
+  const c = useCopy().contact
   return (
     <PlayBox className={previewBox}>
       <div className="flex items-center gap-3 mb-4">
@@ -163,7 +161,7 @@ function GitHubPreview() {
         </div>
         <div className="leading-tight">
           <p className="text-[12px] text-fg font-semibold">{GITHUB_HANDLE}</p>
-          <p className="text-[10px] text-muted">Shipping projects in public</p>
+          <p className="text-[10px] text-muted">{c.githubNote}</p>
         </div>
       </div>
       <div className="grid grid-flow-col grid-rows-7 gap-[3px] w-fit">
@@ -217,74 +215,74 @@ const actionBase = 'group/btn inline-flex items-center justify-center gap-2 roun
 const iconNudge = 'transition-transform duration-200 group-hover/btn:-rotate-12 group-hover/btn:scale-110'
 
 function EmailCard() {
+  const c = useCopy().contact
   return (
     <div className={cardClass}>
       <SpotLayer />
       <EmailPreview />
-      <CardBody icon={Icon.email} label="Email" value={EMAIL} />
+      <CardBody icon={Icon.email} label={c.email} value={EMAIL} />
       <div className="mt-auto flex flex-wrap gap-3 px-5 pb-5 pt-1">
         <Magnetic className="flex-1" strength={0.2}>
-          <a href={`mailto:${EMAIL}`}
+          <a href={`mailto:${EMAIL}?subject=${encodeURIComponent(c.mailSubject)}`}
             className={`${actionBase} w-full border-accent/30 bg-accent/10 text-fg hover:bg-accent/20`}>
-            <span className={iconNudge}>{Icon.email}</span> Write an email
+            <span className={iconNudge}>{Icon.email}</span> {c.writeEmail}
           </a>
         </Magnetic>
-        <CopyButton text={EMAIL} doneMessage="Email address copied" label="Copy" />
+        <CopyButton text={EMAIL} doneMessage={c.emailCopied} label={c.copy} doneLabel={c.copied} />
       </div>
     </div>
   )
 }
 
 function PhoneCard() {
+  const c = useCopy().contact
   return (
     <div className={cardClass}>
       <SpotLayer />
       <WhatsAppPreview />
       <CardBody
         icon={Icon.phone}
-        label="Phone · WhatsApp"
+        label={c.phone}
         value={PHONE_DISPLAY}
-        note="Available for phone calls or WhatsApp"
+        note={c.phoneNote}
       />
       <div className="mt-auto flex flex-wrap gap-3 px-5 pb-5 pt-1">
         <Magnetic className="flex-1" strength={0.2}>
           <a href={`tel:${PHONE_TEL}`}
             className={`${actionBase} w-full border-accent/30 bg-accent/10 text-fg hover:bg-accent/20`}>
-            <span className={iconNudge}>{Icon.phone}</span> Call
+            <span className={iconNudge}>{Icon.phone}</span> {c.call}
           </a>
         </Magnetic>
         <Magnetic className="flex-1" strength={0.2}>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+          <a href={WHATSAPP} target="_blank" rel="noopener noreferrer"
             className={`${actionBase} w-full border-good/30 bg-good/10 text-good hover:bg-good/20`}>
-            <span className={iconNudge}>{Icon.chat}</span> WhatsApp
+            <span className={iconNudge}>{Icon.chat}</span> {c.whatsapp}
           </a>
         </Magnetic>
-        <CopyButton text={PHONE_DISPLAY} doneMessage="Phone number copied" label="Copy number" className="basis-full" />
+        <CopyButton text={PHONE_DISPLAY} doneMessage={c.phoneCopied} label={c.copyNumber} doneLabel={c.copied} className="basis-full" />
       </div>
     </div>
   )
 }
 
 export default function Contact() {
+  const c = useCopy().contact
   return (
-    <section id="contact" className="py-28 px-6">
+    <section id="contact" aria-labelledby="contact-title" className="py-28 px-6">
       <div className="max-w-5xl mx-auto">
 
-        <SectionHeader eyebrow="Contact" title="Let's talk" size="lg">
-          I'm open to data science, pricing, risk and AI roles on fast-moving teams, especially
-          startups and fintech. Prefer a quick call? Call or WhatsApp me any time.
-        </SectionHeader>
+        <SectionHeader id="contact-title" eyebrow={c.eyebrow} title={c.title} size="lg">{c.intro}</SectionHeader>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Reveal className="h-full"><EmailCard /></Reveal>
           <Reveal delay={0.12} className="h-full"><PhoneCard /></Reveal>
           <Reveal className="h-full">
-            <LinkCard href={`https://www.linkedin.com/in/${LINKEDIN_HANDLE}`} preview={<LinkedInPreview />}
-              icon={Icon.linkedin} label="LinkedIn" value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />
+            <LinkCard href={LINKEDIN} preview={<LinkedInPreview />}
+              icon={Icon.linkedin} label={c.linkedin} value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />
           </Reveal>
           <Reveal delay={0.12} className="h-full">
-            <LinkCard href={`https://github.com/${GITHUB_HANDLE}`} preview={<GitHubPreview />}
-              icon={Icon.github} label="GitHub" value={`github.com/${GITHUB_HANDLE}`} />
+            <LinkCard href={GITHUB} preview={<GitHubPreview />}
+              icon={Icon.github} label={c.github} value={`github.com/${GITHUB_HANDLE}`} />
           </Reveal>
         </div>
       </div>

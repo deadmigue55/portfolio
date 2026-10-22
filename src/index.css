@@ -11,10 +11,10 @@
 :root {
   --bg: #FFF4EA;
   --fg: #07162B;
-  --accent: #B84A00;
+  --accent: #A84300;   /* 4.6:1 or better on every tinted surface (WCAG AA) */
   --accent-2: #E0701A;
   --on-accent: #FFF4EA;
-  --good: #0B7A4B;
+  --good: #0A6F44;
 
   --soft:   color-mix(in srgb, var(--fg) 84%, var(--bg));
   --muted:  color-mix(in srgb, var(--fg) 72%, var(--bg));
@@ -109,12 +109,12 @@
   --color-good: var(--good);
 
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+:root[data-motion="reduced"] { scroll-behavior: auto; }
 
 body {
   font-family: var(--font-sans);
@@ -257,11 +257,12 @@ h1, h2, h3 {
 }
 
 /* Visitors who ask for less motion get a calm, still glow */
-@media (prefers-reduced-motion: reduce) {
-  .ns-drift, .ns-pulse, .ns-flash, .ns-ambient { animation: none !important; }
-  .ns-pulse { opacity: 0.45; }
-  .ns-flash { opacity: 0; }
-}
+:root[data-motion="reduced"] .ns-drift,
+:root[data-motion="reduced"] .ns-pulse,
+:root[data-motion="reduced"] .ns-flash,
+:root[data-motion="reduced"] .ns-ambient { animation: none !important; }
+:root[data-motion="reduced"] .ns-pulse { opacity: 0.45; }
+:root[data-motion="reduced"] .ns-flash { opacity: 0; }
 
 /* ════════════════════════════════════════════
    Accents (used across sections)
@@ -369,10 +370,12 @@ h1, h2, h3 {
 @keyframes caret-blink { 50% { opacity: 0; } }
 .caret { animation: caret-blink 1s steps(1) infinite; }
 
-@media (prefers-reduced-motion: reduce) {
-  .neon-bar, .neon-ring::before, .neon-ring::after,
-  .neon-dot, .neon-name, .caret { animation: none !important; }
-}
+:root[data-motion="reduced"] .neon-bar,
+:root[data-motion="reduced"] .neon-ring::before,
+:root[data-motion="reduced"] .neon-ring::after,
+:root[data-motion="reduced"] .neon-dot,
+:root[data-motion="reduced"] .neon-name,
+:root[data-motion="reduced"] .caret { animation: none !important; }
 
 /* Press ripple on buttons (NeonButton.jsx): a ring that grows from the click point */
 .btn-ripple {
@@ -389,9 +392,7 @@ h1, h2, h3 {
 @keyframes btn-ripple {
   to { transform: scale(2.6); opacity: 0; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .btn-ripple { animation: none; opacity: 0; }
-}
+:root[data-motion="reduced"] .btn-ripple { animation: none; opacity: 0; }
 
 
 /* ════════════════════════════════════════════
@@ -496,10 +497,12 @@ h1, h2, h3 {
 }
 .spark-flicker { animation: spark-flicker 7s linear infinite; }
 
-@media (prefers-reduced-motion: reduce) {
-  .beam-line, .circuit-pulse, .circuit-pulse-v, .spark-flicker { animation: none !important; }
-  .circuit-pulse, .circuit-pulse-v { opacity: 0; }
-}
+:root[data-motion="reduced"] .beam-line,
+:root[data-motion="reduced"] .circuit-pulse,
+:root[data-motion="reduced"] .circuit-pulse-v,
+:root[data-motion="reduced"] .spark-flicker { animation: none !important; }
+:root[data-motion="reduced"] .circuit-pulse,
+:root[data-motion="reduced"] .circuit-pulse-v { opacity: 0; }
 
 /* ════════════════════════════════════════════
    Card previews (Previews.jsx)
@@ -576,14 +579,15 @@ h1, h2, h3 {
 }
 .pv.is-playing .pv-banner { background-size: 220% 100%; animation: neon-slide 5s linear infinite; }
 
-@media (prefers-reduced-motion: reduce) {
-  .pv * { animation: none !important; }
-  .pv.is-armed .pv-slide { opacity: 1; transform: none; }
-  .pv.is-armed .pv-draw { stroke-dashoffset: 0; }
-  .pv.is-armed .pv-fade, .pv.is-armed .pv-pop, .pv.is-armed .pv-caret { opacity: 1; }
-  .pv.is-armed .pv-grow, .pv.is-armed .pv-pop { transform: none; }
-  .pv.is-armed .pv-type { width: var(--w, auto); }
-}
+:root[data-motion="reduced"] .pv * { animation: none !important; }
+:root[data-motion="reduced"] .pv.is-armed .pv-slide { opacity: 1; transform: none; }
+:root[data-motion="reduced"] .pv.is-armed .pv-draw { stroke-dashoffset: 0; }
+:root[data-motion="reduced"] .pv.is-armed .pv-fade,
+:root[data-motion="reduced"] .pv.is-armed .pv-pop,
+:root[data-motion="reduced"] .pv.is-armed .pv-caret { opacity: 1; }
+:root[data-motion="reduced"] .pv.is-armed .pv-grow,
+:root[data-motion="reduced"] .pv.is-armed .pv-pop { transform: none; }
+:root[data-motion="reduced"] .pv.is-armed .pv-type { width: var(--w, auto); }
 
 /* ════════════════════════════════════════════
    Cursor light on cards (Spotlight.jsx sets --mx, --my and --spot per card)
@@ -613,4 +617,54 @@ h1, h2, h3 {
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+}
+
+/* ════════════════════════════════════════════
+   Switching theme or language (transition.js)
+   Theme: the new look opens as a circle from the button you pressed.
+   Language: the browser's default cross-fade. Both are skipped for visitors who ask for less motion.
+   ════════════════════════════════════════════ */
+
+:root[data-vt="theme"]::view-transition-old(root) { animation: none; }
+:root[data-vt="theme"]::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: vt-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes vt-reveal {
+  from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0)); }
+  to   { clip-path: circle(150vmax at var(--vt-x, 50%) var(--vt-y, 0)); }
+}
+
+/* ════════════════════════════════════════════
+   Skip link, shown on keyboard focus
+   ════════════════════════════════════════════ */
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 0;
+  z-index: 100;
+  transform: translateY(-120%);
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 0.2s ease;
+}
+.skip-link:focus { transform: translateY(1rem); }
+
+/* ════════════════════════════════════════════
+   Print: a clean page (decoration off, links spelled out)
+   ════════════════════════════════════════════ */
+
+@media print {
+  :root { --bg: #fff; --fg: #07162B; --accent: #B84A00; }
+  .neon-bg, nav, .skip-link, [role="status"], .hero-spotlight, .beam-line, .circuit, .dot-grid, .spot-fill, .spot-border { display: none !important; }
+  body { background: #fff !important; }
+  section { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; break-inside: avoid-page; }
+  * { animation: none !important; transition: none !important; box-shadow: none !important; text-shadow: none !important; }
+  a[href^="http"]:not([href*="wa.me"])::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #555; word-break: break-all; }
+  #story .sticky { position: static !important; height: auto !important; }
 }

@@ -6,10 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://deadmigue.vercel.app/" />
-    <!-- Fonts: Bricolage Grotesque (headings), IBM Plex Sans and Mono (text, numbers), Instrument Serif (surname) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" />
+    <!-- Fonts are self-hosted (see src/main.jsx): no third-party request blocks the first paint -->
     <title>Miguel Vilchis · Actuary, Pricing & Risk, Data & AI</title>
     <meta name="description" content="Miguel Vilchis: actuary working in pricing and risk analytics at SCOR. Rebuilt Mexico's mortality tables from 3 million death records, then priced, stress-tested and reinsured them. Open to roles in Mexico City or remote." />
 
@@ -17,12 +14,20 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#FFF4EA" />
     <script>
-      // Applies a saved theme choice before first paint, so there is no flash
+      // Applies the saved theme, motion and language choices before first paint, so there is no flash
       try {
         var t = localStorage.getItem('theme');
         if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#07162B' : '#FFF4EA');
+      } catch (e) {}
+      try {
+        var root = document.documentElement;
+        var calm = localStorage.getItem('motion') === 'paused' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        root.setAttribute('data-motion', calm ? 'reduced' : 'full');
+        var q = new URLSearchParams(location.search).get('lang');
+        var l = q === 'en' || q === 'es' ? q : localStorage.getItem('lang');
+        if (l === 'es') root.lang = 'es';
       } catch (e) {}
     </script>
 
@@ -57,9 +62,34 @@
         "sameAs": ["https://github.com/deadmigue55", "https://www.linkedin.com/in/deadmigue"]
       }
     </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Mortality Table Builder",
+        "description": "An end-to-end actuarial pipeline for Mexico: rebuilds the mortality table from 3 million registered deaths, then projects, prices, stress-tests and reinsures it. Live dashboard, Excel workbook and an 11-page report.",
+        "url": "https://mortality-table-builder.streamlit.app/",
+        "codeRepositoryUrl": "https://github.com/deadmigue55/Mortality-Table-Builder",
+        "programmingLanguage": ["Python", "R", "SQL"],
+        "author": { "@type": "Person", "name": "Miguel Vilchis", "url": "https://deadmigue.vercel.app/" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:40rem;margin:4rem auto;padding:0 1.5rem;font:16px/1.6 system-ui,sans-serif;color:#07162B">
+        <h1 style="font-size:2rem;margin:0 0 .5rem">Miguel Vilchis</h1>
+        <p>Actuary · Pricing &amp; Risk · Data &amp; AI. I work in pricing and risk analytics at SCOR and rebuilt Mexico's mortality tables from 3 million death records, then priced, stress-tested and reinsured them.</p>
+        <p>This page needs JavaScript for its interactive charts. The work itself is public:</p>
+        <ul>
+          <li><a href="https://mortality-table-builder.streamlit.app/">Live dashboard</a></li>
+          <li><a href="https://github.com/deadmigue55/Mortality-Table-Builder">Source code on GitHub</a></li>
+          <li><a href="https://www.linkedin.com/in/deadmigue">LinkedIn</a> · <a href="https://github.com/deadmigue55">GitHub</a></li>
+          <li><a href="mailto:migue.vilchis@ciencias.unam.mx">migue.vilchis@ciencias.unam.mx</a></li>
+        </ul>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

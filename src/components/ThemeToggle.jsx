@@ -1,4 +1,5 @@
 import { useTheme } from '../theme'
+import { useCopy } from '../i18n'
 
 const icons = {
   light: (
@@ -20,20 +21,21 @@ const icons = {
   ),
 }
 
-const options = [
-  { id: 'light', label: 'Light theme' },
-  { id: 'system', label: 'Match my system' },
-  { id: 'dark', label: 'Dark theme' },
-]
-
-// Three-way switch: the visitor's system by default, or an explicit light/dark choice
+// Three-way switch: the visitor's system by default, or an explicit light/dark choice.
+// A choice opens as a circle from the button (see transition.js).
 export default function ThemeToggle({ className = '' }) {
   const [mode, choose] = useTheme()
+  const c = useCopy().controls
+  const options = [
+    { id: 'light', label: c.themeLight },
+    { id: 'system', label: c.themeSystem },
+    { id: 'dark', label: c.themeDark },
+  ]
   return (
-    <div role="group" aria-label="Color theme"
+    <div role="group" aria-label={c.themeGroup}
       className={`inline-flex items-center rounded-full border border-line bg-subtle p-0.5 ${className}`}>
       {options.map(o => (
-        <button key={o.id} type="button" onClick={() => choose(o.id)}
+        <button key={o.id} type="button" onClick={e => choose(o.id, e.currentTarget)}
           aria-label={o.label} aria-pressed={mode === o.id} title={o.label}
           className={`grid size-7 place-items-center rounded-full transition-colors ${
             mode === o.id ? 'bg-accent text-on-accent' : 'text-muted hover:text-fg'}`}>

@@ -1,117 +1,74 @@
+import { useState } from 'react'
 import NeonButton from './NeonButton'
 import Reveal from './Reveal'
 import { SpotLayer } from './Electric'
 import SectionHeader from './SectionHeader'
 import { StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview } from './Previews'
+import { useCopy } from '../i18n'
 
-const categories = [
-  {
-    label: 'Probability & Statistical Theory',
-    color: 'indigo',
-    Preview: StatsPreview,
-    skills: [
-      'A/B Testing & Hypothesis Testing',
-      'Bayesian Inference & MCMC',
-      'Maximum Likelihood Estimation',
-      'Central Limit Theorem Applications',
-      'Confidence Intervals & p-values',
-      'Chi-Squared & F-Tests',
-      'Non-Parametric Methods',
-      'Bootstrap & Resampling',
-    ],
-  },
-  {
-    label: 'Actuarial Science',
-    color: 'violet',
-    Preview: ActuarialPreview,
-    skills: [
-      'IBNR Reserving (Chain Ladder, BF)',
-      'Pricing & Experience Rating',
-      'Survival Analysis & Hazard Models',
-      'Credibility Theory (Bühlmann)',
-      'Loss Distributions (Pareto, LogN)',
-      'Risk Measures: VaR, CVaR, TVaR',
-      'Extreme Value Theory',
-      'Copula Modeling',
-    ],
-  },
-  {
-    label: 'Quantitative Finance & ML',
-    color: 'cyan',
-    Preview: QuantPreview,
-    skills: [
-      'Credit Risk Scoring (PD, LGD, EAD)',
-      'Monte Carlo Simulation',
-      'Stochastic Processes (Brownian Motion)',
-      'ARIMA, GARCH Time Series',
-      'GLMs & Regression Analysis',
-      'Gradient Boosting (XGBoost)',
-      'Principal Component Analysis',
-      'Markov Chain Models',
-    ],
-  },
-  {
-    label: 'Data Engineering & Tools',
-    color: 'sky',
-    Preview: ToolsPreview,
-    skills: [
-      'Python (Pandas, NumPy, sklearn)',
-      'R (actuarial packages)',
-      'SQL (advanced queries)',
-      'Git & GitHub',
-      'Jupyter & Streamlit',
-      'Excel (VBA, Solver, PivotTables)',
-      'AI-assisted development (Claude Code)',
-      'LaTeX (mathematical typesetting)',
-    ],
-  },
-]
+/*
+  Skills as evidence. A skill that was used in a shipped project is marked with a dot and highlighted;
+  hovering, focusing or tapping it says where (in a caption inside the card, so nothing is clipped on a phone).
+  The others stay listed but quieter. A skill earns its mark only when the project really uses it.
+  The previews are in the same order as the categories in the copy.
+*/
 
-const colorMap = {
-  indigo: { tag: 'bg-accent/10 text-accent border-accent/20', header: 'text-accent', glow: 'var(--glow)' },
-  violet: { tag: 'bg-accent/10 text-accent border-accent/20', header: 'text-accent', glow: 'var(--glow)' },
-  cyan:   { tag: 'bg-accent/10   text-accent   border-accent/20',   header: 'text-accent',   glow: 'var(--glow)' },
-  sky:    { tag: 'bg-accent/10    text-accent    border-accent/20',    header: 'text-accent',    glow: 'var(--glow)' },
+const PREVIEWS = [StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview]
+
+function Chip({ skill, onHint }) {
+  const c = useCopy().skills
+  if (!skill.proof) {
+    return <span className="rounded-full border border-line bg-subtle px-3 py-1 text-xs font-medium text-muted">{skill.n}</span>
+  }
+  const show = () => onHint(skill)
+  return (
+    <button type="button" onMouseEnter={show} onFocus={show} onClick={show} onMouseLeave={() => onHint(null)} onBlur={() => onHint(null)}
+      aria-label={`${skill.n}. ${c.proofIn(skill.proof)}`}
+      className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-fg transition-colors hover:border-accent hover:bg-accent/20 focus-visible:border-accent">
+      <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_6px_var(--glow)]" />
+      {skill.n}
+    </button>
+  )
 }
 
-function NeonCard({ cat }) {
-  const c = colorMap[cat.color]
-
+function SkillCard({ cat, Preview }) {
+  const c = useCopy().skills
+  const [hint, setHint] = useState(null)
   return (
-    <div className="spot-card relative h-full overflow-hidden p-6 rounded-xl border border-line bg-card">
+    <div className="spot-card relative h-full p-6 rounded-xl border border-line bg-card">
       <SpotLayer />
 
       <div className="relative z-10 mb-5">
-        <cat.Preview />
+        <Preview />
       </div>
 
-      <h3 className={`${c.header} font-semibold mb-4 text-sm tracking-wide uppercase relative z-10`}>
-        {cat.label}
-      </h3>
+      <h3 className="text-accent font-semibold mb-4 text-sm tracking-wide uppercase relative z-10">{cat.label}</h3>
       <div className="flex flex-wrap gap-2 relative z-10">
-        {cat.skills.map(s => (
-          <span key={s} className={`px-3 py-1 rounded-full text-xs font-medium border ${c.tag}`}>
-            {s}
-          </span>
-        ))}
+        {cat.skills.map(s => <Chip key={s.n} skill={s} onHint={setHint} />)}
       </div>
+
+      {/* Where the highlighted skill was used */}
+      <p aria-live="polite" className="relative z-10 mt-4 min-h-[2.6rem] border-t border-line pt-3 text-[12.5px] leading-snug text-muted">
+        {hint
+          ? <><span className="font-medium text-fg">{hint.n}</span> · {hint.proof}</>
+          : <span className="text-faint">{c.legend}</span>}
+      </p>
     </div>
   )
 }
 
 export default function Skills() {
+  const c = useCopy().skills
   return (
-    <section id="skills" className="py-28 px-6 bg-subtle/40">
+    <section id="skills" aria-labelledby="skills-title" className="py-28 px-6 bg-subtle/40">
       <div className="max-w-5xl mx-auto">
 
-        <SectionHeader eyebrow="Skills" title="What I bring to the table">
-          Actuarial rigor, statistical depth and the engineering to turn them into working tools.
-        </SectionHeader>
+        <SectionHeader id="skills-title" eyebrow={c.eyebrow} title={c.title}>{c.intro}</SectionHeader>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {categories.map((cat, i) => (
-            <Reveal key={cat.label} delay={(i % 2) * 0.12} className="h-full">
-              <NeonCard cat={cat} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {c.categories.map((cat, i) => (
+            <Reveal key={i} delay={(i % 2) * 0.12} className="h-full">
+              <SkillCard cat={cat} Preview={PREVIEWS[i]} />
             </Reveal>
           ))}
         </div>
@@ -120,14 +77,10 @@ export default function Skills() {
         <div className="spot-card relative mt-10 p-5 rounded-xl border border-line bg-card flex flex-col md:flex-row items-start md:items-center gap-4">
           <SpotLayer />
           <div className="flex-1">
-            <p className="text-fg font-medium">Currently leveling up</p>
-            <p className="text-muted text-sm mt-1">
-              SOA Exam FM · Building AI-powered apps with LLM APIs · Full-stack development with React
-            </p>
+            <p className="text-fg font-medium">{c.levelingTitle}</p>
+            <p className="text-muted text-sm mt-1">{c.leveling}</p>
           </div>
-          <NeonButton href="#contact" variant="ghost">
-            Let's talk
-          </NeonButton>
+          <NeonButton href="#contact" variant="ghost">{c.talk}</NeonButton>
         </div>
       </div>
     </section>
