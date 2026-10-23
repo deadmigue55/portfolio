@@ -95,9 +95,10 @@ const en = {
       next: 'Next',
       count: (i, n) => `${i} of ${n}`,
       items: [
-        { file: 'overview', title: 'Overview', alt: 'Dashboard overview page: life expectancy, 746,000 excess deaths, 96 of 100 data checks passing and three findings.' },
+        { file: 'overview', title: 'Overview', alt: 'Dashboard overview page: life expectancy, 746,000 excess deaths, 118 of 122 data checks passing and four findings.' },
+        { file: 'insured', title: 'Insured lives', alt: 'Insured lives page: the insured-lives mortality table for men against the population and the regulatory table, with raw rates, a confidence band and the age above which the table is an estimate.' },
         { file: 'pandemic', title: 'The pandemic', alt: 'Pandemic page: 746,429 excess deaths, and monthly deaths against the expected baseline, with the uncertainty range shown.' },
-        { file: 'price', title: 'Price a policy', alt: 'Price a policy page: sliders for sex, age, term and target return, with the premium, return and payback year computed live.' },
+        { file: 'price', title: 'Price a policy', alt: 'Price a policy page: sliders for sex, age, term and target return, priced by default on the insured-lives table, with the premium, return and payback year computed live.' },
         { file: 'experience', title: 'Experience study', alt: 'Experience study page: actual over expected mortality by underwriting class with 95% confidence intervals, on a synthetic book.' },
         { file: 'reinsurance', title: 'Reinsurance lab', alt: 'Reinsurance lab page: sliders for pandemic frequency and market terms, and a choice of treaty to compare.' },
       ],

@@ -106,7 +106,7 @@ with sync_playwright() as p:
     check("lightbox opens (dialog)", page.locator("dialog[open]").count() == 1)
     page.keyboard.press("ArrowRight")
     page.wait_for_timeout(200)
-    check("lightbox arrow key advances", "3 of 5" in page.locator("dialog[open]").inner_text())
+    check("lightbox arrow key advances", "4 of 6" in page.locator("dialog[open]").inner_text())
     page.screenshot(path=str(OUT / "06-lightbox.png"))
     page.keyboard.press("Escape")
     page.wait_for_timeout(300)

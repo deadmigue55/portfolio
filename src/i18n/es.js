@@ -95,9 +95,10 @@ const es = {
       next: 'Siguiente',
       count: (i, n) => `${i} de ${n}`,
       items: [
-        { file: 'overview', title: 'Resumen', alt: 'Página de resumen del dashboard (en inglés): esperanza de vida, 746 mil muertes en exceso, 96 de 100 verificaciones de datos aprobadas y tres hallazgos.' },
+        { file: 'overview', title: 'Resumen', alt: 'Página de resumen del dashboard (en inglés): esperanza de vida, 746 mil muertes en exceso, 118 de 122 verificaciones de datos aprobadas y cuatro hallazgos.' },
+        { file: 'insured', title: 'Vida asegurada', alt: 'Página de vida asegurada (en inglés): la tabla de mortalidad de personas aseguradas, hombres, frente a la población y a la tabla regulatoria, con tasas observadas, banda de confianza y la edad a partir de la cual la tabla es una estimación.' },
         { file: 'pandemic', title: 'La pandemia', alt: 'Página de la pandemia (en inglés): 746,429 muertes en exceso y muertes mensuales frente a la base esperada, con el rango de incertidumbre.' },
-        { file: 'price', title: 'Tarificar una póliza', alt: 'Página para tarificar una póliza (en inglés): controles de sexo, edad, plazo y rendimiento objetivo, con prima, rendimiento y año de recuperación calculados en vivo.' },
+        { file: 'price', title: 'Tarificar una póliza', alt: 'Página para tarificar una póliza (en inglés): controles de sexo, edad, plazo y rendimiento objetivo, tarificada por defecto con la tabla de vida asegurada, con prima, rendimiento y año de recuperación calculados en vivo.' },
         { file: 'experience', title: 'Estudio de experiencia', alt: 'Página del estudio de experiencia (en inglés): mortalidad real entre esperada por clase de suscripción con intervalos de confianza de 95%, sobre una cartera sintética.' },
         { file: 'reinsurance', title: 'Laboratorio de reaseguro', alt: 'Página del laboratorio de reaseguro (en inglés): controles de frecuencia de pandemia y condiciones de mercado, y una selección de tratado para comparar.' },
       ],
