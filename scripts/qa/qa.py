@@ -57,24 +57,22 @@ with sync_playwright() as p:
     ) == "home,projects,explore,story,skills,about,contact")
 
     # Hero proof is visible without hovering
-    check("hero shows the proof line", "3 million death records" in page.locator("#home").inner_text())
+    check("hero shows the proof line", "20 million insured lives" in page.locator("#home").inner_text())
+    hero = page.locator("#home").inner_text()
+    check("hero chart: insured men, population and CNSF in the legend", all(w in hero.lower() for w in ("insured men", "whole population", "cnsf 2013")))
     check("hero axis labels not covered by the hint", page.locator("#home svg text", has_text="100").count() >= 1)
 
-    # Explorer numbers: men at 40 must match the project's results (4.1x, 6.62 vs 1.74 per 1,000)
+    # Explorer opens on the insured table: men at 40 (0.85 per 1,000 of cover, 13% of the population's rate)
     page.locator("#explore").scroll_into_view_if_needed()
     page.wait_for_timeout(1600)
     txt = page.locator("#explore").inner_text()
-    check("explorer: 4.1x at 40 (men)", "4.1×" in txt)
-    check("explorer: premium 6.62 vs 1.74", "6.62" in txt and "1.74" in txt, "")
-    check("explorer: ~74% too cheap", "74%" in txt)
-    page.screenshot(path=str(OUT / "02-explore-men40.png"))
-    # Version 2: insured lives, men at 40 (0.85 per 1,000 of cover on the insured table, 13% of the population's rate)
-    page.locator("#explore button[role=radio]", has_text="Insured lives").click()
-    page.wait_for_timeout(1400)
-    txt = page.locator("#explore").inner_text()
+    check("explorer opens on insured lives", page.locator("#explore button[role=radio][aria-checked=true]", has_text="Insured lives").count() == 1)
     check("explorer insured: premium 0.85 vs 6.62 vs 1.74", "0.85" in txt and "6.62" in txt and "1.74" in txt)
+    ticks = page.locator("#explore svg text").evaluate_all("els => els.map(e => e.textContent)")
+    check("explorer chart starts at age 15 (no 0 tick, 20 first)", "0" not in ticks and "20" in ticks, str(ticks[:8]))
     check("explorer insured: dies at 13% of the population rate", "13% of the population" in txt)
     check("explorer insured: no estimate warning at 40", "is an estimate" not in txt)
+    check("explorer insured: shows the chance of a claim within the term, not life expectancy", "within a 20-year term" in txt and "Years of life" not in txt)
     page.screenshot(path=str(OUT / "02b-explore-insured-men40.png"))
     page.locator("#explore-age").fill("65")
     page.wait_for_timeout(1000)
@@ -82,6 +80,12 @@ with sync_playwright() as p:
     page.locator("#explore-age").fill("40")
     page.locator("#explore button[role=radio]", has_text="Whole population").click()
     page.wait_for_timeout(1000)
+    txt = page.locator("#explore").inner_text()
+    check("explorer population: 4.1x at 40 (men)", "4.1×" in txt)
+    check("explorer population: premium 6.62 vs 1.74", "6.62" in txt and "1.74" in txt)
+    check("explorer population: ~74% too cheap", "74%" in txt)
+    check("explorer population: shows life expectancy", "Years of life still to live" in txt)
+    page.screenshot(path=str(OUT / "02-explore-men40.png"))
     page.locator("#explore button[role=radio]", has_text="Women").click()
     page.wait_for_timeout(1200)
     txt = page.locator("#explore").inner_text()
@@ -121,7 +125,12 @@ with sync_playwright() as p:
     check("skills: hover shows where it was used", "simulated aggregate claims" in page.locator("#skills").inner_text())
     page.screenshot(path=str(OUT / "07-skills.png"))
 
-    # Story section pinned frames
+    # Skills without a shipped project show a generic example instead
+    page.get_by_role("button", name="Copula Modeling").first.hover()
+    page.wait_for_timeout(200)
+    check("skills: a skill without a project shows an example", "Example: modelling how two risks" in page.locator("#skills").inner_text())
+
+    # Story section: pinned frames, and a click jumps to a stage whose drawing is complete
     page.locator("#story").scroll_into_view_if_needed()
     page.evaluate("document.getElementById('story').scrollIntoView()")
     page.wait_for_timeout(600)
@@ -129,6 +138,19 @@ with sync_playwright() as p:
         page.evaluate(f"window.scrollTo(0, document.getElementById('story').offsetTop + {off})")
         page.wait_for_timeout(700)
         page.screenshot(path=str(OUT / f"08-story-{i}.png"))
+    page.get_by_role("button", name="Say where the data stops").click()
+    page.wait_for_timeout(1800)
+    story = page.locator("#story").inner_text()
+    check("story: clicking a stage jumps to it", "last age the data supports" in story)
+    page.screenshot(path=str(OUT / "08-story-click.png"))
+    # a stage keeps its stat on screen across a long stretch of scroll (the rest after the drawing)
+    y0 = page.evaluate("window.scrollY")
+    held = 0
+    for dy in (-120, 120, 240):
+        page.mouse.wheel(0, dy)
+        page.wait_for_timeout(500)
+        held += "last age the data supports" in page.locator("#story").inner_text()
+    check("story: a stage holds across +-240px of scroll", held == 3, f"{held} of 3")
 
     # Command menu
     page.evaluate("window.scrollTo(0, 0)")
@@ -150,7 +172,7 @@ with sync_playwright() as p:
     check("Spanish title", "Actuaría" in page.title(), page.title())
     check("lang stored", page.evaluate("localStorage.getItem('lang')") == "es")
     first_stat = page.locator("#home dl dt").first.inner_text()
-    check("hero numbers do not recount after a language switch", first_stat.strip() == "746 mil", first_stat)
+    check("hero numbers do not recount after a language switch", first_stat.strip() == "81 mil", first_stat)
     page.screenshot(path=str(OUT / "10-hero-es.png"))
     for sec in ["projects", "explore", "story", "skills", "about", "contact"]:
         page.evaluate(f"document.getElementById('{sec}').scrollIntoView()")

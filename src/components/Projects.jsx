@@ -188,6 +188,24 @@ function Flagship() {
         </div>
       </div>
 
+      {/* The business case: always visible, because it is what a hiring company wants to see */}
+      <div className="border-t border-line p-5 lg:p-8">
+        <div className="mb-5 max-w-3xl">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-accent">{f.impact.title}</h4>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">{f.impact.intro}</p>
+        </div>
+        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {f.impact.steps.map((s, i) => (
+            <li key={s.k} className="rounded-lg border border-line bg-subtle p-4">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-faint">0{i + 1} · {s.k}</p>
+              <p className="mt-2 font-mono text-2xl font-medium text-accent">{s.value}</p>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-soft">{s.text}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 max-w-3xl text-[12px] leading-relaxed text-faint">{f.impact.caveat}</p>
+      </div>
+
       {/* The case study: opens in place (grid-rows animates the height, nothing jumps) */}
       <div id="flagship-case" role="region" aria-label={f.title}
         className={`grid transition-[grid-template-rows] duration-500 ease-out ${caseOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>

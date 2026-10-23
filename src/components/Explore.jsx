@@ -24,15 +24,20 @@ const TERM = 20
 
 // Plot box inside a 520 x 300 drawing; the vertical axis is logarithmic
 const X0 = 50, X1 = 504, Y0 = 20, Y1 = 212
-const LO = Math.log10(1e-4)
+const LO_Q = 5e-5
+const LO = Math.log10(LO_Q)
 const HI = Math.log10(1)
-const px = age => X0 + (age / 100) * (X1 - X0)
-const py = q => Y1 - ((Math.log10(Math.max(q, 1e-4)) - LO) / (HI - LO)) * (Y1 - Y0)
-const path = qx => qx.slice(0, 101).map((q, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)},${py(q).toFixed(1)}`).join('')
+// The chart starts at 15: below it nobody buys a policy and the insured table, built from insurance
+// data, has almost none, so its curve would only dive at the left edge
+const AGE_FROM = 15
+const AGE_TO = 100
+const px = age => X0 + ((age - AGE_FROM) / (AGE_TO - AGE_FROM)) * (X1 - X0)
+const py = q => Y1 - ((Math.log10(Math.max(q, LO_Q)) - LO) / (HI - LO)) * (Y1 - Y0)
+const path = qx => qx.slice(AGE_FROM, AGE_TO + 1).map((q, i) => `${i ? 'L' : 'M'}${px(i + AGE_FROM).toFixed(1)},${py(q).toFixed(1)}`).join('')
 const PATHS = { M: path(data.qx.M), F: path(data.qx.F), CNSF: path(data.qx.CNSF), IM: path(data.qx.IM), IF: path(data.qx.IF) }
 const CREDIBLE_TO = 60 // above this age the insured table borrows the population's shape (little data)
 const GRID = [[1e-4, '0.01%'], [1e-3, '0.1%'], [1e-2, '1%'], [1e-1, '10%'], [1, '100%']]
-const TICKS = [0, 20, 40, 60, 80, 100]
+const TICKS = [20, 40, 60, 80, 100]
 
 const fmtSmall = v => (v < 1 ? v.toFixed(2) : v < 10 ? v.toFixed(1) : v.toFixed(0))
 const fmtPrice = v => (v < 10 ? v.toFixed(2) : v.toFixed(1))
@@ -105,7 +110,7 @@ export default function Explore() {
   const { reduced } = useMotionPref()
   const [sex, setSex] = useState('M')
   const [age, setAge] = useState(40)
-  const [basis, setBasis] = useState('population') // 'population' or 'insured'
+  const [basis, setBasis] = useState('insured') // 'insured' (the pricing table of version 2) or 'population'
   const svgRef = useRef(null)
   const dragging = useRef(false)
   const insured = basis === 'insured'
@@ -120,16 +125,16 @@ export default function Explore() {
     const qP = pop[age]
     // The chance of dying before 65 (before 85 once past 65): a cumulative view of the same gap
     const target = age < 65 ? 65 : 85
-    const at = t => [dieBefore(t, age, target) * 100, lifeExpectancy(t, age), termPremium(t, age, TERM, data.interest) * 1000]
-    const [bM, eM, pM] = at(qx)
-    const [bC, eC, pC] = at(cn)
-    const [bP, eP, pP] = at(pop)
-    return { qM, qC, qP, ratio: qM / qC, ofPopulation: qM / qP, target, bM, bC, bP, eM, eC, eP, pM, pC, pP }
+    const at = t => [dieBefore(t, age, target) * 100, lifeExpectancy(t, age), termPremium(t, age, TERM, data.interest) * 1000, dieBefore(t, age, age + TERM) * 100]
+    const [bM, eM, pM, tM] = at(qx)
+    const [bC, eC, pC, tC] = at(cn)
+    const [bP, eP, pP, tP] = at(pop)
+    return { qM, qC, qP, ratio: qM / qC, ofPopulation: qM / qP, target, bM, bC, bP, eM, eC, eP, pM, pC, pP, tM, tC, tP }
   }, [key, sex, age])
 
   // The rows of every card: the highlighted table first, then the ones it is compared with
   const names = insured
-    ? { risk: [c.insured.name, c.insured.population, c.cards.risk.cnsf], life: [c.insured.name, c.insured.population, c.cards.life.cnsf], price: [c.insured.pricedInsured, c.insured.pricedPopulation, c.cards.price.cnsf] }
+    ? { risk: [c.insured.name, c.insured.population, c.cards.risk.cnsf], term: [c.insured.name, c.insured.population, c.cards.risk.cnsf], price: [c.insured.pricedInsured, c.insured.pricedPopulation, c.cards.price.cnsf] }
     : { risk: [c.cards.risk.mexico, c.cards.risk.cnsf], life: [c.cards.life.mexico, c.cards.life.cnsf], price: [c.cards.price.mexico, c.cards.price.cnsf] }
   const rowsOf = (kind, values, format, unit) => values.map((value, i) => ({ name: names[kind][i], value, format, unit }))
   const pick = (m, p, cn) => (insured ? [m, p, cn] : [m, cn])
@@ -144,7 +149,7 @@ export default function Explore() {
   const scrub = e => {
     const box = svgRef.current.getBoundingClientRect()
     const x = ((e.clientX - box.left) / box.width) * 520
-    const a = Math.round(((x - X0) / (X1 - X0)) * 100)
+    const a = Math.round(AGE_FROM + ((x - X0) / (X1 - X0)) * (AGE_TO - AGE_FROM))
     setAge(Math.min(AGE_MAX, Math.max(AGE_MIN, a)))
   }
   const onPointerDown = e => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); scrub(e) }
@@ -176,8 +181,8 @@ export default function Explore() {
             <div role="radiogroup" aria-label={c.basis}>
               <p className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.18em] text-faint">{c.basis}</p>
               <div className="inline-flex rounded-full border border-line bg-subtle p-0.5">
-                <button type="button" role="radio" aria-checked={!insured} onClick={() => setBasis('population')} className={seg(!insured)}>{c.basisPopulation}</button>
                 <button type="button" role="radio" aria-checked={insured} onClick={() => setBasis('insured')} className={seg(insured)}>{c.basisInsured}</button>
+                <button type="button" role="radio" aria-checked={!insured} onClick={() => setBasis('population')} className={seg(!insured)}>{c.basisPopulation}</button>
               </div>
             </div>
 
@@ -254,9 +259,15 @@ export default function Explore() {
                   label: c.cards.risk.before(r.target),
                   rows: rowsOf('risk', pick(r.bM, r.bP, r.bC), fmtPct, '%'),
                 }} />
-              <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-2" label={c.cards.life.label}
-                note={insured ? c.insured.lifeNote(CREDIBLE_TO) : c.cards.life.gap(r.eC - r.eM)}
-                rows={rowsOf('life', pick(r.eM, r.eP, r.eC), v => v.toFixed(1), c.cards.life.unit)} />
+              {insured ? (
+                <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-2" label={c.insured.claimLabel(TERM)}
+                  note={(age + TERM > CREDIBLE_TO ? c.insured.claimNoteEst : c.insured.claimNote)(`${(r.tC / r.tM).toFixed(1)}`, CREDIBLE_TO)}
+                  rows={rowsOf('term', pick(r.tM, r.tP, r.tC), fmtPct, '%')} />
+              ) : (
+                <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-2" label={c.cards.life.label}
+                  note={c.cards.life.gap(r.eC - r.eM)}
+                  rows={rowsOf('life', pick(r.eM, r.eP, r.eC), v => v.toFixed(1), c.cards.life.unit)} />
+              )}
               <Metric reduced={reduced} className="lg:col-start-1 lg:row-start-2" label={c.cards.price.label} note={priceNote}
                 rows={rowsOf('price', pick(r.pM, r.pP, r.pC), fmtPrice)} />
             </>

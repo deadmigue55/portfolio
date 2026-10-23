@@ -9,7 +9,9 @@ import { useCopy } from '../i18n'
 /*
   Skills as evidence. A skill that was used in a shipped project is marked with a dot and highlighted;
   hovering, focusing or tapping it says where (in a caption inside the card, so nothing is clipped on a phone).
-  The others stay listed but quieter. A skill earns its mark only when the project really uses it.
+  The others are quieter and show a short generic example instead. A skill earns its mark only when
+  a project really uses it: the goal is to move every skill from an example to a project (replace its
+  `eg` with a `proof` in the copy).
   The previews are in the same order as the categories in the copy.
 */
 
@@ -17,15 +19,15 @@ const PREVIEWS = [StatsPreview, ActuarialPreview, QuantPreview, ToolsPreview]
 
 function Chip({ skill, onHint }) {
   const c = useCopy().skills
-  if (!skill.proof) {
-    return <span className="rounded-full border border-line bg-subtle px-3 py-1 text-xs font-medium text-muted">{skill.n}</span>
-  }
   const show = () => onHint(skill)
+  const shipped = Boolean(skill.proof)
   return (
     <button type="button" onMouseEnter={show} onFocus={show} onClick={show} onMouseLeave={() => onHint(null)} onBlur={() => onHint(null)}
-      aria-label={`${skill.n}. ${c.proofIn(skill.proof)}`}
-      className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-fg transition-colors hover:border-accent hover:bg-accent/20 focus-visible:border-accent">
-      <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_6px_var(--glow)]" />
+      aria-label={`${skill.n}. ${shipped ? c.proofIn(skill.proof) : `${c.egLabel}: ${skill.eg}`}`}
+      className={shipped
+        ? 'inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-medium text-fg transition-colors hover:border-accent hover:bg-accent/20 focus-visible:border-accent'
+        : 'inline-flex items-center rounded-full border border-line bg-subtle px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:text-fg focus-visible:border-accent'}>
+      {shipped && <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_6px_var(--glow)]" />}
       {skill.n}
     </button>
   )
@@ -50,7 +52,7 @@ function SkillCard({ cat, Preview }) {
       {/* Where the highlighted skill was used */}
       <p aria-live="polite" className="relative z-10 mt-4 min-h-[2.6rem] border-t border-line pt-3 text-[12.5px] leading-snug text-muted">
         {hint
-          ? <><span className="font-medium text-fg">{hint.n}</span> · {hint.proof}</>
+          ? <><span className="font-medium text-fg">{hint.n}</span> · {hint.proof ?? <>{c.egLabel}: {hint.eg}</>}</>
           : <span className="text-faint">{c.legend}</span>}
       </p>
     </div>

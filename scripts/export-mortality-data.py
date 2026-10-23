@@ -26,6 +26,87 @@ def round6(values):
     return [float(f"{v:.6g}") for v in values]
 
 
+def pct(x, digits=0):
+    value = round(100 * float(x), digits)
+    return int(value) if digits == 0 else value
+
+
+def impact(con, q_men):
+    """The business case of version 2, every number read from the project's tables.
+
+    Price: a 20-year term priced on the insured table (with its margin) against the same product
+    priced on CNSF 2013, both at the 10% target return. Return: what the policy earns if mortality
+    is as measured. Market: what the market wrote and reported on traditional term cover. Book:
+    how the claims of a book of equal policies settle down as it grows (binomial, one year).
+    """
+    prem = con.execute(
+        "select sex, issue_age, saving_vs_cnsf, irr_best_estimate, gross_premium_per_1000, "
+        "gross_premium_cnsf_per_1000 from pricing_insured where term = 20"
+    ).fetchall()
+    by = {(r[0], r[1]): r for r in prem}
+    saving = {s: [r[2] for r in prem if r[0] == s] for s in ("M", "F")}
+    irr = [r[3] for r in prem]
+    margin = con.execute("select recommended_margin from insured_margin limit 1").fetchone()[0]
+
+    m = con.execute(
+        "select sum(lives), sum(sum_assured), sum(premium), sum(deaths), sum(claimed), sum(paid) "
+        "from insured_market where segment='term_traditional' and year between 2023 and 2025"
+    ).fetchone()
+    lives, sum_assured, premium, deaths, claimed, paid = m
+
+    pooled = con.execute(
+        "select sum(deaths), sum(exposure) from insured_pooled where segment='all'"
+    ).fetchone()
+    ratio = con.execute(
+        "select min(ratio_population), max(ratio_population) from insured_table "
+        "where segment='all' and age between 25 and 65"
+    ).fetchone()
+    stress = dict(
+        con.execute(
+            "select kind, extra_pct from stress_pandemic_book "
+            "where scenario in ('2021 as insured lives lived it', 'CNSF 99.5th percentile table')"
+        ).fetchall()
+    )
+
+    q40 = q_men[40]
+    cv = lambda n: ((1 - q40) / (n * q40)) ** 0.5  # noqa: E731
+    return {
+        "target": 0.10,
+        "margin": round(float(margin), 4),
+        "price": {
+            "m40": pct(by[("M", 40)][2]),
+            "f40": pct(by[("F", 40)][2]),
+            "menRange": [pct(min(saving["M"])), pct(max(saving["M"]))],
+            "womenRange": [pct(min(saving["F"])), pct(max(saving["F"]))],
+            "range": [pct(min(min(v) for v in saving.values())), pct(max(max(v) for v in saving.values()))],
+            "grossM40": round(by[("M", 40)][4], 2),
+            "grossCnsfM40": round(by[("M", 40)][5], 2),
+        },
+        "returnAtMeasured": [pct(min(irr)), pct(max(irr))],
+        "market": {
+            "years": "2023-2025",
+            "premiumBn": round(premium / 1e9, 1),
+            "claimedBn": round(claimed / 1e9, 1),
+            "claimsShare": pct(claimed / premium),
+            "paidShare": pct(paid / premium),
+            "deaths": int(deaths),
+            "premiumPer1000": round(1000 * premium / sum_assured, 2),
+            "avgSumAssuredK": round(sum_assured / lives / 1000),
+        },
+        "book": {
+            "q40": float(f"{q40:.6g}"),
+            "cv": {str(n): pct(cv(n), 1) for n in (10_000, 100_000, 1_000_000)},
+            "policiesFor15": int(round((1 - q40) / (q40 * margin**2), -3)),
+        },
+        "pandemic": {"insuredLived": pct(stress["observed"]), "regulator": pct(stress["regulatory"])},
+        "data": {
+            "deaths": int(pooled[0]),
+            "livesPerYear": round(pooled[1] / 3 / 1e6, 1),
+            "ofPopulation": [pct(ratio[0]), pct(ratio[1])],
+        },
+    }
+
+
 def main():
     db = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_DB
     con = sqlite3.connect(db)
@@ -90,6 +171,7 @@ def main():
     data = {
         "year": YEAR,
         "interest": INTEREST,
+        "impact": impact(con, insured["M"]),
         "source": "INEGI deaths and CONAPO population, graduated; CNSF M 2013 base table; "
         "CNSF individual life statistics 2023-2025 (insured, traditional term)",
         "qx": {

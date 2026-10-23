@@ -5,10 +5,12 @@ import Reveal from './Reveal'
 import { BeamBorder } from './Electric'
 import { useCopy } from '../i18n'
 import { useMotionPref } from '../motion-pref'
+import data from '../data/mortality'
 
 /*
-  "How it was built": a pinned tour of the Mortality Table Builder. The section sticks to the screen
-  while the page scrolls past it, and the scroll position scrubs five small drawings, one per stage.
+  "How it was built": a pinned tour of the Mortality Table Builder (version 2, the insured-lives table). The
+  section sticks to the screen while the page scrolls past it, and the scroll position scrubs five small
+  drawings, one per stage: clean, graduate, limit, stress, price.
   Every number is a real result of the project. The shapes are drawn to explain, not to measure,
   and say so on the card. On phones and when motion is reduced or paused there is no pinning:
   the five stages stack and each drawing is shown complete.
@@ -24,7 +26,7 @@ const noise = (i, s = 1) => {
 
 const useRange = (p, a, b) => useTransform(p, [a, b], [0, 1], { clamp: true })
 
-/* ── 1. Rebuild: late registrations complete the latest years ── */
+/* ── 1. Clean: the adjustment ledger sits on top of the real death claims ── */
 const BAR_H = [86, 90, 93, 96, 99, 102, 128, 150, 118]
 const CAP = [0.01, 0.01, 0.01, 0.015, 0.02, 0.025, 0.05, 0.09, 0.16]
 
@@ -96,7 +98,7 @@ function VisualGraduate({ p, t }) {
   )
 }
 
-/* ── 3. Project: the curve is extended and the doubt widens ── */
+/* ── 3. Limit: the data stops, the curve borrows a shape and the doubt widens ── */
 function VisualProject({ p, t }) {
   const past = useRange(p, 0, 0.4)
   const fan = useRange(p, 0.35, 0.95)
@@ -122,11 +124,11 @@ function VisualProject({ p, t }) {
   )
 }
 
-/* ── 4. Stress: what the pandemic would do to claims ── */
+/* ── 4. Stress: what 2021 did to insured lives, against the regulator's scenario ── */
 function Column({ p, x, value, label, strong }) {
   const grow = useRange(p, 0.05, 0.8)
   const text = useTransform(grow, v => `+${Math.round(v * value)}%`)
-  const h = value * 2.2
+  const h = value * 1.05
   return (
     <g>
       <motion.rect x={x} y={190 - h} width="74" height={h} rx="3"
@@ -142,20 +144,21 @@ function VisualStress({ p, t }) {
   return (
     <svg viewBox="0 0 400 240" className="h-full w-full" aria-hidden="true">
       <line x1="40" y1="190" x2="360" y2="190" stroke="var(--line)" />
-      <Column p={p} x={92} value={51} label={t.regulator} />
-      <Column p={p} x={232} value={60} label={t.replayed} strong />
+      <Column p={p} x={92} value={data.impact.pandemic.regulator} label={t.regulator} />
+      <Column p={p} x={232} value={data.impact.pandemic.insuredLived} label={t.replayed} strong />
     </svg>
   )
 }
 
-/* ── 5. Reinsure: how much of the capital a treaty takes away ── */
-function VisualReinsure({ p, t }) {
-  const total = useRange(p, 0, 0.35)
-  const relief = useRange(p, 0.45, 0.95)
+/* ── 5. Price: the same policy, priced on the regulator's table and on the insured-lives table ── */
+function VisualPrice({ p, t }) {
+  const { grossM40, grossCnsfM40, m40 } = data.impact.price
+  const share = grossM40 / grossCnsfM40
+  const first = useRange(p, 0, 0.35)
+  const second = useRange(p, 0.45, 0.95)
   const lab = useRange(p, 0.2, 0.5)
   const lab2 = useRange(p, 0.75, 1)
   const W = 330
-  const pandemic = W * 0.41
   const left = 35
   const edge = { transformBox: 'fill-box', transformOrigin: '0% 50%' }
   return (
@@ -163,42 +166,49 @@ function VisualReinsure({ p, t }) {
       <motion.g style={{ opacity: lab }} fontSize="9.5" fill="var(--muted)" fontFamily="IBM Plex Mono, monospace">
         <text x={left} y="62">{t.capital}</text>
       </motion.g>
-      <motion.rect x={left} y="72" width={W} height="34" rx="4" fill="var(--accent)" fillOpacity="0.18" stroke="var(--line)"
-        style={{ ...edge, scaleX: total }} />
-      <motion.rect x={left} y="72" width={pandemic} height="34" rx="4" fill="var(--accent)" style={{ ...edge, scaleX: total }} />
-      <motion.text x={left + pandemic / 2} y="94" textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--on-accent)" style={{ ...mono, opacity: lab }}>
-        {t.pandemic}
+      <motion.rect x={left} y="72" width={W} height="34" rx="4" fill="var(--muted)" fillOpacity="0.4" stroke="var(--line)"
+        style={{ ...edge, scaleX: first }} />
+      <motion.text x={left + 12} y="94" fontSize="12" fontWeight="600" fill="var(--fg)" style={{ ...mono, opacity: lab }}>
+        {grossCnsfM40.toFixed(2)} <tspan fontSize="9" fontWeight="400" fill="var(--muted)">{t.pandemic}</tspan>
       </motion.text>
 
       <motion.g style={{ opacity: lab2 }} fontSize="9.5" fill="var(--muted)" fontFamily="IBM Plex Mono, monospace">
         <text x={left} y="150">{t.stopLoss}</text>
       </motion.g>
-      <rect x={left} y="160" width={W} height="34" rx="4" fill="var(--accent)" fillOpacity="0.18" stroke="var(--line)" />
-      <motion.rect x={left} y="160" width={pandemic * 0.4} height="34" rx="4" fill="var(--accent)" style={{ opacity: lab2 }} />
-      <motion.rect x={left + pandemic * 0.4} y="160" width={pandemic * 0.6} height="34" rx="4" fill="var(--good)" fillOpacity="0.55"
-        strokeDasharray="4 3" stroke="var(--good)" style={{ ...edge, scaleX: relief }} />
-      <motion.text x={left + pandemic * 0.7} y="181" textAnchor="middle" fontSize="10.5" fontWeight="600" fill="var(--fg)" style={{ ...mono, opacity: lab2 }}>
+      <rect x={left} y="160" width={W} height="34" rx="4" fill="var(--accent)" fillOpacity="0.1" stroke="var(--line)" strokeDasharray="4 3" />
+      <motion.rect x={left} y="160" width={W * share} height="34" rx="4" fill="var(--accent)" style={{ ...edge, scaleX: second }} />
+      <motion.text x={left + 12} y="182" fontSize="12" fontWeight="600" fill="var(--on-accent)" style={{ ...mono, opacity: lab2 }}>
+        {grossM40.toFixed(2)}
+      </motion.text>
+      <motion.text x={left + W} y="182" textAnchor="end" fontSize="10.5" fill="var(--muted)" style={{ ...mono, opacity: lab2 }}>
+        -{m40}%
+      </motion.text>
+      <motion.text x={left} y="222" fontSize="10.5" fontWeight="600" fill="var(--fg)" style={{ ...mono, opacity: lab2 }}>
         {t.relieved}
       </motion.text>
     </svg>
   )
 }
 
-const VISUALS = [VisualRebuild, VisualGraduate, VisualProject, VisualStress, VisualReinsure]
+const VISUALS = [VisualRebuild, VisualGraduate, VisualProject, VisualStress, VisualPrice]
 const N = VISUALS.length
+const DRAW = 0.4 // share of a stage's scroll used to draw it; the rest is a rest where it stays complete
+const VH_PER_STAGE = 135 // scroll given to each stage, in screen heights x 100
 
 /* ── Pinned stage ── */
 function Layer({ progress, i, Visual, t }) {
   const lo = i / N
   const hi = (i + 1) / N
-  const e = 0.012
+  const e = 0.015
   const opacity = useTransform(
     progress,
     i === 0 ? [0, hi - e, hi + e] : i === N - 1 ? [lo - e, lo + e, 1] : [lo - e, lo + e, hi - e, hi + e],
     i === 0 ? [1, 1, 0] : i === N - 1 ? [0, 1, 1] : [0, 1, 1, 0],
   )
-  // Progress of this stage alone, finishing a little before its slot ends so the drawing rests
-  const local = useTransform(progress, [lo, (i + 0.85) / N], [0, 1], { clamp: true })
+  // Progress of this stage alone: the drawing is made in the first part of its slot and then holds,
+  // finished, for the rest of it, so a small scroll never lands on a half-drawn stage and a big one
+  // still has time to be read before the next stage takes over
+  const local = useTransform(progress, [lo, lo + DRAW / N], [0, 1], { clamp: true })
   return (
     <motion.div className="absolute inset-0 p-5 pb-16" style={{ opacity }}>
       <Visual p={local} t={t} />
@@ -223,7 +233,7 @@ function VisualCard({ progress, active, steps, t, note }) {
   )
 }
 
-function StepList({ progress, active, steps }) {
+function StepList({ progress, active, steps, onSelect }) {
   const fill = useTransform(progress, [0, 1], [0, 1])
   return (
     <div className="relative pl-7">
@@ -233,8 +243,12 @@ function StepList({ progress, active, steps }) {
       <ol className="space-y-5">
         {steps.map((s, i) => (
           <li key={s.k}>
-            <p className={`text-[11px] uppercase tracking-[0.22em] transition-colors duration-500 ${i === active ? 'text-accent' : 'text-faint'}`} style={mono}>0{i + 1} · {s.k}</p>
-            <h3 className={`mt-1 text-lg font-semibold transition-colors duration-500 md:text-xl ${i === active ? 'text-fg' : 'text-muted'}`}>{s.title}</h3>
+            {/* a click jumps to the middle of the stage's rest, so any step can be read at once */}
+            <button type="button" onClick={() => onSelect(i)} aria-current={i === active ? 'step' : undefined}
+              className="block w-full cursor-pointer text-left">
+              <span className={`block text-[11px] uppercase tracking-[0.22em] transition-colors duration-500 ${i === active ? 'text-accent' : 'text-faint hover:text-muted'}`} style={mono}>0{i + 1} · {s.k}</span>
+              <h3 className={`mt-1 text-lg font-semibold transition-colors duration-500 md:text-xl ${i === active ? 'text-fg' : 'text-muted hover:text-fg'}`}>{s.title}</h3>
+            </button>
             <div className={`grid transition-[grid-template-rows] duration-500 ease-out ${i === active ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
               <p className="overflow-hidden text-sm leading-relaxed text-muted">
                 <span className="block pt-2">{s.text}</span>
@@ -255,11 +269,21 @@ function Pinned({ steps, t, note }) {
     const next = Math.min(N - 1, Math.max(0, Math.floor(v * N)))
     setActive(cur => (cur === next ? cur : next))
   })
+  const { reduced } = useMotionPref()
+  const select = i => {
+    const el = ref.current
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY
+    const range = el.offsetHeight - window.innerHeight
+    // the middle of the stage's rest: its drawing is complete and the next stage is far away
+    const at = top + range * ((i + (DRAW + 1) / 2) / N)
+    window.scrollTo({ top: at, behavior: reduced ? 'auto' : 'smooth' })
+  }
   return (
-    <div ref={ref} className="relative" style={{ height: `${N * 90 + 60}vh` }}>
+    <div ref={ref} className="relative" style={{ height: `${N * VH_PER_STAGE + 60}vh` }}>
       <div className="sticky top-0 flex h-screen items-center pt-16">
         <div className="mx-auto grid w-full max-w-5xl items-center gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <StepList progress={scrollYProgress} active={active} steps={steps} />
+          <StepList progress={scrollYProgress} active={active} steps={steps} onSelect={select} />
           <VisualCard progress={scrollYProgress} active={active} steps={steps} t={t} note={note} />
         </div>
       </div>
