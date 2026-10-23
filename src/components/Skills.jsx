@@ -9,7 +9,7 @@ import { useCopy } from '../i18n'
 /*
   Skills as evidence. A skill that was used in a shipped project is marked with a dot and highlighted;
   hovering, focusing or tapping it says where (in a caption inside the card, so nothing is clipped on a phone).
-  The others are quieter and show a short generic example instead. A skill earns its mark only when
+  The others are quieter and show a short line about using the skill in other work (`eg` in the copy). A skill earns its mark only when
   a project really uses it: the goal is to move every skill from an example to a project (replace its
   `eg` with a `proof` in the copy).
   The previews are in the same order as the categories in the copy.

@@ -128,7 +128,7 @@ with sync_playwright() as p:
     # Skills without a shipped project show a generic example instead
     page.get_by_role("button", name="Copula Modeling").first.hover()
     page.wait_for_timeout(200)
-    check("skills: a skill without a project shows an example", "Example: modelling how two risks" in page.locator("#skills").inner_text())
+    check("skills: a skill without a project says where it was used elsewhere", "In other work: modelled how two risks" in page.locator("#skills").inner_text())
 
     # Story section: pinned frames, and a click jumps to a stage whose drawing is complete
     page.locator("#story").scroll_into_view_if_needed()
