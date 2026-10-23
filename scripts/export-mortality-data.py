@@ -2,7 +2,8 @@
 
 Reads the demo bundle of the Mortality Table Builder (a SQLite file shipped in that repository)
 and writes src/data/mortality.js: one-year death probabilities (qx) for ages 0 to 110, Mexican
-men and women in 2023 (graduated INEGI + CONAPO), and the regulator's CNSF M 2013 base table.
+men and women in 2023 (graduated INEGI + CONAPO), the regulator's CNSF M 2013 base table and the
+insured-lives table of version 2 (CNSF individual life statistics, traditional term cover).
 It also writes reference values (life expectancy, 20-year term premium) so that the JavaScript
 actuarial maths in src/lib/actuarial.js can be checked against the Python project:
 run `node scripts/verify-actuarial.mjs`.
@@ -64,14 +65,39 @@ def main():
     ).fetchone()
     checks["CNSF"] = {"e65": float(f"{ref[0]:.6g}"), "termPremium20": {"40": float(f"{ref[1]:.8g}")}}
 
+    # Version 2: the table a quote is priced on, from CNSF individual life statistics
+    # (traditional term cover, the pricing basis of the project)
+    insured = {}
+    for sex in ("M", "F"):
+        rows = con.execute(
+            "select age, qx from insured_table where segment='term_traditional' and sex=? order by age",
+            (sex,),
+        ).fetchall()
+        assert [r[0] for r in rows] == list(range(111)), f"unexpected insured ages for {sex}"
+        insured[sex] = [r[1] for r in rows]
+        prem = {
+            r[0]: r[1] / 1000
+            for r in con.execute(
+                "select issue_age, premium_per_1000 from insured_premiums "
+                "where \"table\"='Mexico insured: Term, traditional' and sex=? and term=20 "
+                "and issue_age in (25,30,40,50,60)",
+                (sex,),
+            )
+        }
+        assert len(prem) == 5, f"missing insured premiums for {sex}"
+        checks["I" + sex] = {"termPremium20": {str(k): float(f"{v:.8g}") for k, v in prem.items()}}
+
     data = {
         "year": YEAR,
         "interest": INTEREST,
-        "source": "INEGI deaths and CONAPO population, graduated; CNSF M 2013 base table",
+        "source": "INEGI deaths and CONAPO population, graduated; CNSF M 2013 base table; "
+        "CNSF individual life statistics 2023-2025 (insured, traditional term)",
         "qx": {
             "M": round6(life("M", "qx")),
             "F": round6(life("F", "qx")),
             "CNSF": round6([r[1] for r in cnsf]),
+            "IM": round6(insured["M"]),
+            "IF": round6(insured["F"]),
         },
         "checks": checks,
     }

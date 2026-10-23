@@ -19,6 +19,12 @@ for (const sex of ['M', 'F']) {
   check(`${sex} life expectancy at birth`, lifeExpectancy(data.qx[sex], 0), ref.e0, 0.02)
   check(`${sex} life expectancy at 65`, lifeExpectancy(data.qx[sex], 65), ref.e65, 0.02)
 }
+// Version 2: the insured-lives table (traditional term), against the project's premium table
+for (const sex of ['M', 'F']) {
+  for (const [age, want] of Object.entries(data.checks['I' + sex].termPremium20)) {
+    check(`insured ${sex} 20-year term premium at ${age}`, termPremium(data.qx['I' + sex], +age, 20, data.interest), want, want * 2e-4)
+  }
+}
 const cnsf = data.checks.CNSF
 check('CNSF 20-year term premium at 40', termPremium(data.qx.CNSF, 40, 20, data.interest), cnsf.termPremium20['40'], cnsf.termPremium20['40'] * 2e-4)
 check('CNSF life expectancy at 65', lifeExpectancy(data.qx.CNSF, 65), cnsf.e65, 0.05)

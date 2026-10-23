@@ -10,10 +10,11 @@ import data from '../data/mortality'
 import { dieBefore, lifeExpectancy, termPremium } from '../lib/actuarial'
 
 /*
-  "Try the table": the project's real 2023 mortality table, running in the visitor's browser.
-  Pick a sex and an age; the page shows the chance of dying within a year, the remaining life
-  expectancy and the price of a 20-year term policy, on the Mexican table and on the regulator's
-  (CNSF M 2013). The data comes from the Python project (scripts/export-mortality-data.py) and the
+  "Try the table": the project's real mortality tables, running in the visitor's browser.
+  Pick a sex, an age and a table (the whole population in 2023, or the insured lives of version 2);
+  the page shows the chance of dying within a year, the remaining life expectancy and the price of
+  a 20-year term policy, against the regulator's table (CNSF M 2013) and, for insured lives, the
+  population's. The data comes from the Python project (scripts/export-mortality-data.py) and the
   maths is checked against it (scripts/verify-actuarial.mjs).
 */
 
@@ -28,7 +29,8 @@ const HI = Math.log10(1)
 const px = age => X0 + (age / 100) * (X1 - X0)
 const py = q => Y1 - ((Math.log10(Math.max(q, 1e-4)) - LO) / (HI - LO)) * (Y1 - Y0)
 const path = qx => qx.slice(0, 101).map((q, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)},${py(q).toFixed(1)}`).join('')
-const PATHS = { M: path(data.qx.M), F: path(data.qx.F), CNSF: path(data.qx.CNSF) }
+const PATHS = { M: path(data.qx.M), F: path(data.qx.F), CNSF: path(data.qx.CNSF), IM: path(data.qx.IM), IF: path(data.qx.IF) }
+const CREDIBLE_TO = 60 // above this age the insured table borrows the population's shape (little data)
 const GRID = [[1e-4, '0.01%'], [1e-3, '0.1%'], [1e-2, '1%'], [1e-1, '10%'], [1, '100%']]
 const TICKS = [0, 20, 40, 60, 80, 100]
 
@@ -103,25 +105,34 @@ export default function Explore() {
   const { reduced } = useMotionPref()
   const [sex, setSex] = useState('M')
   const [age, setAge] = useState(40)
+  const [basis, setBasis] = useState('population') // 'population' or 'insured'
   const svgRef = useRef(null)
   const dragging = useRef(false)
+  const insured = basis === 'insured'
+  const key = insured ? `I${sex}` : sex // the highlighted curve
 
   const r = useMemo(() => {
-    const qx = data.qx[sex]
+    const qx = data.qx[key]
+    const pop = data.qx[sex]
     const cn = data.qx.CNSF
     const qM = qx[age]
     const qC = cn[age]
-    const pM = termPremium(qx, age, TERM, data.interest) * 1000
-    const pC = termPremium(cn, age, TERM, data.interest) * 1000
+    const qP = pop[age]
     // The chance of dying before 65 (before 85 once past 65): a cumulative view of the same gap
     const target = age < 65 ? 65 : 85
-    return {
-      qM, qC, ratio: qM / qC,
-      target, bM: dieBefore(qx, age, target) * 100, bC: dieBefore(cn, age, target) * 100,
-      eM: lifeExpectancy(qx, age), eC: lifeExpectancy(cn, age),
-      pM, pC,
-    }
-  }, [sex, age])
+    const at = t => [dieBefore(t, age, target) * 100, lifeExpectancy(t, age), termPremium(t, age, TERM, data.interest) * 1000]
+    const [bM, eM, pM] = at(qx)
+    const [bC, eC, pC] = at(cn)
+    const [bP, eP, pP] = at(pop)
+    return { qM, qC, qP, ratio: qM / qC, ofPopulation: qM / qP, target, bM, bC, bP, eM, eC, eP, pM, pC, pP }
+  }, [key, sex, age])
+
+  // The rows of every card: the highlighted table first, then the ones it is compared with
+  const names = insured
+    ? { risk: [c.insured.name, c.insured.population, c.cards.risk.cnsf], life: [c.insured.name, c.insured.population, c.cards.life.cnsf], price: [c.insured.pricedInsured, c.insured.pricedPopulation, c.cards.price.cnsf] }
+    : { risk: [c.cards.risk.mexico, c.cards.risk.cnsf], life: [c.cards.life.mexico, c.cards.life.cnsf], price: [c.cards.price.mexico, c.cards.price.cnsf] }
+  const rowsOf = (kind, values, format, unit) => values.map((value, i) => ({ name: names[kind][i], value, format, unit }))
+  const pick = (m, p, cn) => (insured ? [m, p, cn] : [m, cn])
 
   const sexName = sex === 'M' ? c.men : c.women
   const mx = px(age)
@@ -162,6 +173,14 @@ export default function Explore() {
               </div>
             </div>
 
+            <div role="radiogroup" aria-label={c.basis}>
+              <p className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.18em] text-faint">{c.basis}</p>
+              <div className="inline-flex rounded-full border border-line bg-subtle p-0.5">
+                <button type="button" role="radio" aria-checked={!insured} onClick={() => setBasis('population')} className={seg(!insured)}>{c.basisPopulation}</button>
+                <button type="button" role="radio" aria-checked={insured} onClick={() => setBasis('insured')} className={seg(insured)}>{c.basisInsured}</button>
+              </div>
+            </div>
+
             <div className="min-w-[14rem] flex-1">
               <label htmlFor="explore-age" className="mb-2 flex items-baseline justify-between font-mono text-[10.5px] uppercase tracking-[0.18em] text-faint">
                 <span>{c.age}</span>
@@ -183,7 +202,7 @@ export default function Explore() {
               </div>
               <div className="relative mt-3 flex flex-1 items-center">
                 <div className="dot-grid absolute inset-0" aria-hidden="true" />
-                <svg ref={svgRef} viewBox="0 0 520 240" role="img" aria-label={c.chartAria(sexName.toLowerCase(), age)}
+                <svg ref={svgRef} viewBox="0 0 520 240" role="img" aria-label={(insured ? c.insured.chartAria : c.chartAria)(sexName.toLowerCase(), age)}
                   onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
                   className="relative block w-full cursor-crosshair select-none" style={{ touchAction: 'pan-y' }}>
                   {GRID.map(([q, label]) => (
@@ -201,9 +220,10 @@ export default function Explore() {
                   <rect x={px(AGE_MIN)} y={Y0} width={px(AGE_MAX) - px(AGE_MIN)} height={Y1 - Y0} fill="var(--accent)" opacity="0.05" />
 
                   <path d={PATHS.CNSF} fill="none" stroke="var(--muted)" strokeWidth="2" strokeDasharray="5 5" strokeLinecap="round" />
-                  <motion.path initial={false} animate={{ d: PATHS[sex] }} transition={reduced ? { duration: 0 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  {insured && <path d={PATHS[sex]} fill="none" stroke="var(--soft)" strokeWidth="1.8" strokeLinecap="round" />}
+                  <motion.path initial={false} animate={{ d: PATHS[key] }} transition={reduced ? { duration: 0 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round" opacity="0.16" />
-                  <motion.path initial={false} animate={{ d: PATHS[sex] }} transition={reduced ? { duration: 0 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  <motion.path initial={false} animate={{ d: PATHS[key] }} transition={reduced ? { duration: 0 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     fill="none" stroke="var(--accent)" strokeWidth="2.8" strokeLinecap="round" />
 
                   {/* The marker: a guide, the gap between the two tables, and its ratio */}
@@ -213,45 +233,37 @@ export default function Explore() {
                   <motion.circle r="4" fill="var(--bg)" stroke="var(--muted)" strokeWidth="1.8" initial={false} animate={{ cx: mx, cy: yC }} transition={spring} />
                   <motion.g initial={false} animate={{ x: mx + 10, y: (yM + yC) / 2 }} transition={spring}>
                     <rect x="0" y="-11" width="52" height="22" rx="11" fill="var(--bg)" stroke="var(--accent)" strokeWidth="1.2" />
-                    <text x="26" y="4" textAnchor="middle" fontSize="12" fontWeight="500" fontFamily="IBM Plex Mono, monospace" fill="var(--fg)">{r.ratio.toFixed(1)}×</text>
+                    <text x="26" y="4" textAnchor="middle" fontSize="12" fontWeight="500" fontFamily="IBM Plex Mono, monospace" fill="var(--fg)">{r.ratio.toFixed(r.ratio < 1 ? 2 : 1)}×</text>
                   </motion.g>
                 </svg>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                <span className="flex items-center gap-2"><i className="block h-0.5 w-5 rounded bg-accent" /> {sexName} · {c.legendMexico}</span>
+                <span className="flex items-center gap-2"><i className="block h-0.5 w-5 rounded bg-accent" /> {sexName} · {insured ? c.insured.legend : c.legendMexico}</span>
+                {insured && <span className="flex items-center gap-2"><i className="block h-0.5 w-5 rounded bg-soft" /> {c.insured.legendPopulation}</span>}
                 <span className="flex items-center gap-2"><i className="block h-0 w-5 border-t-2 border-dashed border-muted" /> {c.legendCnsf}</span>
               </div>
+              {insured && age > CREDIBLE_TO && <p className="mt-2 text-[12px] leading-snug text-faint">{c.insured.extended(CREDIBLE_TO)}</p>}
             </div>
 
             {/* Results: risk and life on the right, the price (the "so what") under the chart */}
             <>
-              <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-1" label={c.cards.risk.label} note={c.cards.risk.ratio(`${r.ratio.toFixed(1)}×`)}
-                rows={[
-                  { name: c.cards.risk.mexico, value: r.qM * 1000, format: fmtSmall, unit: c.perThousand },
-                  { name: c.cards.risk.cnsf, value: r.qC * 1000, format: fmtSmall, unit: c.perThousand },
-                ]}
+              <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-1" label={c.cards.risk.label}
+                note={insured ? c.insured.ratioPop(`${Math.round(r.ofPopulation * 100)}%`) : c.cards.risk.ratio(`${r.ratio.toFixed(1)}×`)}
+                rows={rowsOf('risk', pick(r.qM, r.qP, r.qC).map(q => q * 1000), fmtSmall, c.perThousand)}
                 second={{
                   label: c.cards.risk.before(r.target),
-                  rows: [
-                    { name: c.cards.risk.mexico, value: r.bM, format: fmtPct, unit: '%' },
-                    { name: c.cards.risk.cnsf, value: r.bC, format: fmtPct, unit: '%' },
-                  ],
+                  rows: rowsOf('risk', pick(r.bM, r.bP, r.bC), fmtPct, '%'),
                 }} />
-              <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-2" label={c.cards.life.label} note={c.cards.life.gap(r.eC - r.eM)}
-                rows={[
-                  { name: c.cards.life.mexico, value: r.eM, format: v => v.toFixed(1), unit: c.cards.life.unit },
-                  { name: c.cards.life.cnsf, value: r.eC, format: v => v.toFixed(1), unit: c.cards.life.unit },
-                ]} />
+              <Metric reduced={reduced} className="lg:col-start-2 lg:row-start-2" label={c.cards.life.label}
+                note={insured ? c.insured.lifeNote(CREDIBLE_TO) : c.cards.life.gap(r.eC - r.eM)}
+                rows={rowsOf('life', pick(r.eM, r.eP, r.eC), v => v.toFixed(1), c.cards.life.unit)} />
               <Metric reduced={reduced} className="lg:col-start-1 lg:row-start-2" label={c.cards.price.label} note={priceNote}
-                rows={[
-                  { name: c.cards.price.mexico, value: r.pM, format: fmtPrice },
-                  { name: c.cards.price.cnsf, value: r.pC, format: fmtPrice },
-                ]} />
+                rows={rowsOf('price', pick(r.pM, r.pP, r.pC), fmtPrice)} />
             </>
           </div>
 
           <p className="mt-5 max-w-3xl text-[12.5px] leading-relaxed text-faint">
-            {c.note}{' '}
+            {insured ? c.insured.note : c.note}{' '}
             <a href={REPO} target="_blank" rel="noopener noreferrer" className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent">{c.verify} →</a>
           </p>
         </Reveal>
