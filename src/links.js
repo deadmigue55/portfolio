@@ -2,6 +2,8 @@
 export const REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
 export const DASHBOARD = 'https://mortality-table-builder.streamlit.app/'
 export const REPORT = `${REPO}/blob/main/reports/methodology.pdf`
+export const FINCRIME_REPO = 'https://github.com/deadmigue55/fincrime-lab'
+export const HANDBOOK = `${REPO}/blob/main/docs/handbook/README.md`
 export const SITE_REPO = 'https://github.com/deadmigue55/portfolio'
 
 export const EMAIL = 'migue.vilchis@ciencias.unam.mx'

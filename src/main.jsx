@@ -11,6 +11,8 @@ import '@fontsource/ibm-plex-mono/latin-500.css'
 import '@fontsource/instrument-serif/latin-400.css'
 import '@fontsource/instrument-serif/latin-400-italic.css'
 import './index.css'
+import './intro.css'
+import './neon2.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

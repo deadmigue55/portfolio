@@ -72,6 +72,9 @@ export default function Hero() {
     >
       <div ref={spotRef} className="hero-spotlight" aria-hidden="true" />
 
+      {/* Color that blooms when the page first loads, then settles into a slow drift */}
+      <div className="aurora" aria-hidden="true" />
+
       {/* Deep radial background glow */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div style={{

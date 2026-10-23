@@ -1,3 +1,4 @@
+import { FINCRIME_REPO } from '../links.js'
 // All visible text, English. es.js has the same shape (scripts/verify-copy.mjs checks that).
 // **double asterisks** mark a phrase that is shown in the stronger text color (see rich() in index.jsx).
 
@@ -111,13 +112,14 @@ const en = {
       desc: 'A mortality table for pricing life insurance in Mexico, built from the regulator’s own statistics on about 20 million insured lives a year. It shows a term policy can be priced a fifth to more than half below a regulatory-table price and still earn its target return.',
       linkDashboard: 'Open the live dashboard',
       linkReport: 'Methodology report (PDF)',
+      linkHandbook: 'Read the math: the handbook',
       whatTitle: 'What I built',
       what: [
         'Rebuilt the pricing table from the regulator’s individual life statistics: 81,000 insured deaths and about 20 million lives a year, four graduation methods compared, and a 15% margin for error sized from a sensitivity analysis of every modelling choice.',
         'Found and removed three traps in the raw data: a fifth of death claims are an adjustment ledger, 2,300 sprain-coded claims are endowment maturities, and deaths must be measured against the lives holding the death cover.',
         'Re-priced and re-stressed on it: premiums, profit tests and reserves, and the pandemic replayed as insured lives lived it (+133% claims in 2021).',
-        'Version 1, the population study: rebuilt Mexico’s mortality tables from 3 million registered deaths, projected them (Lee-Carter and CBD, cross-checked in R), measured 746,000 excess deaths in 2020 to 2022, and built an insurer-style experience study that recovers 15 of 15 planted effects. Reinsurance structures and a longevity swap were priced on it.',
-        'Shipped as a live ten-page dashboard, an Excel workbook with live formulas and a 13-page report, with 122 data checks and 410+ tests on every commit.',
+        'Version 1, the population study: rebuilt Mexico’s mortality tables from 4.7 million registered deaths, projected them (Lee-Carter and CBD, cross-checked in R), measured 746,000 excess deaths in 2020 to 2022, and built an insurer-style experience study that recovers 15 of 15 planted effects. Reinsurance structures and a longevity swap were priced on it.',
+        'Shipped as a live ten-page dashboard, an Excel workbook with live formulas and a 13-page report, with 122 data checks and more than 440 tests on every commit.',
       ],
       why: 'A table of the whole population is the wrong yardstick for a quote: people who buy life insurance die at only 14% to 25% of its rate, and the regulatory table (CNSF 2013) is more than ten years old. Insurers’ own experience tables are private, so this is a transparent, tested alternative built from official data, with every judgement logged.',
       results: [
@@ -143,16 +145,24 @@ const en = {
       intro: 'Next projects. Each one lands here with a live demo and a write-up when it ships.',
       items: [
         {
-          title: 'Credit Risk Scoring Model',
+          title: 'FinCrime Lab',
           status: 'progress',
-          desc: 'Probability of default from financial and behavioral features: a transparent logistic regression baseline against gradient boosting, to show what the extra complexity buys.',
-          tags: ['Python', 'scikit-learn', 'Finance'],
+          desc: 'Fraud detection, anti-money-laundering, A/B tests of fraud rules and chargeback-loss modelling for a simulated Mexican neobank, on SQL, Python and statistics. Fraud and laundering are planted with known truth, so every method is tested on data where the answer is known.',
+          tags: ['Python', 'SQL (DuckDB)', 'Statistics', 'Fraud and AML'],
+          step: { done: 4, total: 11, label: 'Step 4 of 11: the data platform' },
+          facts: [
+            { value: '34.7M', label: 'transactions in the simulated bank (200,000 customers)' },
+            { value: '18 of 18', label: 'acceptance checks pass against census and survey data' },
+            { value: '3', label: 'public benchmark datasets loaded for outside validation' },
+          ],
+          href: FINCRIME_REPO,
+          hrefLabel: 'See the repository',
         },
         {
-          title: 'Reinsurance Claims Dashboard',
+          title: 'Credit Risk Scoring Model',
           status: 'planned',
-          desc: 'Claims patterns, loss ratios and reserve development, modelled on how reinsurance teams read their claims.',
-          tags: ['Python', 'Plotly', 'Reinsurance'],
+          desc: 'Probability of default from financial and behavioral features: a transparent logistic regression baseline against gradient boosting, to show what the extra complexity buys.',
+          tags: ['Python', 'scikit-learn', 'Finance'],
         },
       ],
     },
@@ -338,7 +348,7 @@ const en = {
           { n: 'Excel (VBA, Solver, PivotTables)', proof: 'a workbook with live Dx/Nx/Mx formulas' },
           { n: 'AI-assisted development (Claude Code)', proof: 'built with it, validated by me' },
           { n: 'LaTeX (mathematical typesetting)', eg: 'typeset formulas and technical reports' },
-          { n: 'Data checks & testing (pytest, CI)', proof: '122 data checks and 410+ tests' },
+          { n: 'Data checks & testing (pytest, CI)', proof: '122 data checks and more than 440 tests' },
           { n: 'Reporting with Quarto', proof: 'the 13-page methodology report' },
         ],
       },
@@ -396,7 +406,17 @@ const en = {
     connect: 'Connect',
   },
 
+  intro: {
+    aria: 'Introduction animation',
+    skip: 'Skip intro',
+    eyebrow: 'The survival curve of 100,000 Mexican men',
+    age: 'AGE',
+    alive: 'still alive, of 100,000 at birth',
+    name: 'Miguel Vilchis',
+  },
+
   footer: {
+    replay: 'Replay the intro',
     rights: 'Miguel Vilchis',
     updated: date => `Updated ${date}`,
     built: 'Built with React, Vite and Tailwind · Hosted on Vercel',

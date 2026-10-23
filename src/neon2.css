@@ -1,0 +1,218 @@
+/* ════════════════════════════════════════════
+   Neon 2: spectrum, prism beams, aurora, ambient wash, tilt, cursor ring, age ruler.
+   Layered on top of index.css: it only adds tokens and upgrades the existing beam.
+   Every moving piece stops with the one motion switch (html[data-motion="reduced"]).
+   ════════════════════════════════════════════ */
+
+/* The spectrum used for light that travels. Deeper in light mode so it stays tasteful on apricot. */
+:root {
+  --hue-a: #E0701A;
+  --hue-b: #D6336C;
+  --hue-c: #6D3FD8;
+  --hue-d: #0E8FB0;
+  --hue-e: #0A8F5A;
+  --beam-glow: rgba(214, 51, 108, 0.30);
+  --aur-a: rgba(224, 112, 26, 0.17);
+  --aur-b: rgba(214, 51, 108, 0.10);
+  --aur-c: rgba(109, 63, 216, 0.09);
+  --wash-a: 9%;
+  --wash-b: 7%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hue-a: #FF8A3D; --hue-b: #FF4D8D; --hue-c: #8B5CF6; --hue-d: #22D3EE; --hue-e: #34D399;
+    --beam-glow: rgba(139, 92, 246, 0.55);
+    --aur-a: rgba(139, 92, 246, 0.34); --aur-b: rgba(34, 211, 238, 0.26); --aur-c: rgba(255, 77, 141, 0.24);
+    --wash-a: 17%; --wash-b: 13%;
+  }
+}
+:root[data-theme="dark"] {
+  --hue-a: #FF8A3D; --hue-b: #FF4D8D; --hue-c: #8B5CF6; --hue-d: #22D3EE; --hue-e: #34D399;
+  --beam-glow: rgba(139, 92, 246, 0.55);
+  --aur-a: rgba(139, 92, 246, 0.34); --aur-b: rgba(34, 211, 238, 0.26); --aur-c: rgba(255, 77, 141, 0.24);
+  --wash-a: 17%; --wash-b: 13%;
+}
+
+/* ── Prism beam: the orbiting light now carries the whole spectrum, with a second, fainter light
+      circling the other way round, and it speeds up while the card is hovered ── */
+.beam-line {
+  padding: 2px;
+  background: conic-gradient(
+    from var(--beam),
+    transparent 0deg 188deg,
+    color-mix(in srgb, var(--hue-a) 38%, transparent) 232deg,
+    var(--hue-a) 258deg,
+    var(--hue-b) 290deg,
+    var(--hue-c) 322deg,
+    var(--hue-d) 346deg,
+    var(--beam-core) 357deg,
+    transparent 360deg
+  );
+}
+/* The parent's ring mask already clips this child to the border, so it only needs its own angle */
+.beam-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(from var(--beam), transparent 0deg 292deg, color-mix(in srgb, var(--hue-d) 75%, transparent) 338deg, transparent 360deg);
+  opacity: 0.75;
+  animation: beam-orbit 9s linear infinite reverse;
+}
+*:hover > .beam-line { animation-duration: 3.4s; }
+*:hover > .beam-line::after { animation-duration: 4.6s; }
+:root[data-motion="reduced"] .beam-line::after { display: none; }
+
+/* Spectral light bar under section headings and in progress bars */
+.neon-bar,
+.progress-neon-fill {
+  background: linear-gradient(90deg, var(--hue-a), var(--hue-b), var(--hue-c), var(--hue-d), var(--hue-a));
+  background-size: 300% 100%;
+}
+.progress-neon-fill { box-shadow: 0 0 10px var(--glow); animation: neon-slide 5s linear infinite; }
+:root[data-motion="reduced"] .progress-neon-fill { animation: none; }
+
+/* ── Aurora: a burst of color behind the hero on first load that settles into a quiet drift ── */
+.aurora {
+  position: absolute;
+  inset: -12% -8%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(38% 44% at 18% 26%, var(--aur-a), transparent 70%),
+    radial-gradient(36% 42% at 82% 22%, var(--aur-b), transparent 70%),
+    radial-gradient(40% 40% at 62% 84%, var(--aur-c), transparent 70%);
+  filter: blur(34px) saturate(1.25);
+  animation: aurora-bloom 3.4s ease-out 0.1s forwards, aurora-drift 22s ease-in-out 3.5s infinite alternate;
+}
+@keyframes aurora-bloom { 0% { opacity: 0; } 22% { opacity: 1; } 100% { opacity: 0.45; } }
+@keyframes aurora-drift {
+  from { opacity: 0.45; transform: translate3d(-1.5%, -1%, 0) scale(1); }
+  to   { opacity: 0.6;  transform: translate3d(1.5%, 1.2%, 0) scale(1.05); }
+}
+:root[data-motion="reduced"] .aurora { animation: none; opacity: 0.4; }
+
+/* ── Ambient wash: a fixed layer whose two colors follow the section being read ── */
+@property --ambient   { syntax: '<color>'; initial-value: #FF8A3D; inherits: true; }
+@property --ambient-2 { syntax: '<color>'; initial-value: #8B5CF6; inherits: true; }
+html {
+  --ambient: var(--hue-a);
+  --ambient-2: var(--hue-c);
+  transition: --ambient 1.4s ease, --ambient-2 1.4s ease;
+}
+html[data-section="projects"] { --ambient: var(--hue-a); --ambient-2: var(--hue-b); }
+html[data-section="explore"]  { --ambient: var(--hue-d); --ambient-2: var(--hue-c); }
+html[data-section="story"]    { --ambient: var(--hue-c); --ambient-2: var(--hue-b); }
+html[data-section="skills"]   { --ambient: var(--hue-b); --ambient-2: var(--hue-a); }
+html[data-section="about"]    { --ambient: var(--hue-a); --ambient-2: var(--hue-d); }
+html[data-section="contact"]  { --ambient: var(--hue-b); --ambient-2: var(--hue-d); }
+.ambient-wash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 46% at 92% 4%, color-mix(in srgb, var(--ambient) var(--wash-a), transparent), transparent 72%),
+    radial-gradient(48% 42% at 4% 96%, color-mix(in srgb, var(--ambient-2) var(--wash-b), transparent), transparent 72%);
+}
+
+/* ── Tilt: cards lean toward the cursor and a soft light slides across them ── */
+.tilt {
+  position: relative;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.tilt[data-tilt="on"] { transition-duration: 0.08s; }
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(260px circle at var(--gx, 50%) var(--gy, 50%), color-mix(in srgb, var(--hue-d) 18%, transparent), color-mix(in srgb, var(--hue-b) 8%, transparent) 45%, transparent 70%);
+  mix-blend-mode: screen;
+}
+:root:not([data-theme="dark"]) .tilt-glare { mix-blend-mode: normal; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tilt-glare { mix-blend-mode: screen; } }
+.tilt[data-tilt="on"] .tilt-glare { opacity: 1; }
+:root[data-motion="reduced"] .tilt { transform: none; }
+:root[data-motion="reduced"] .tilt-glare { display: none; }
+
+/* ── Cursor ring: follows the pointer with a little lag, widens over anything clickable ── */
+.cursor-ring, .cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.cursor-ring {
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 1.5px solid color-mix(in srgb, var(--ambient) 80%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--ambient) 35%, transparent);
+  transition: opacity 0.25s ease, width 0.25s ease, height 0.25s ease, margin 0.25s ease, background-color 0.25s ease;
+}
+.cursor-dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: var(--ambient); box-shadow: 0 0 10px var(--ambient); }
+.cursor-ring.is-on, .cursor-dot.is-on { opacity: 1; }
+.cursor-ring.is-link {
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  background-color: color-mix(in srgb, var(--ambient) 11%, transparent);
+}
+@media (hover: none), (pointer: coarse) { .cursor-ring, .cursor-dot { display: none; } }
+:root[data-motion="reduced"] .cursor-ring, :root[data-motion="reduced"] .cursor-dot { display: none; }
+
+/* ── Age ruler: scroll depth as an age, 0 at the top to omega at the bottom ── */
+.age-ruler {
+  position: fixed;
+  right: 12px;
+  top: 112px;
+  bottom: 84px;
+  width: 52px;
+  z-index: 40;
+  display: none;
+  cursor: ns-resize;
+  user-select: none;
+}
+@media (min-width: 1180px) and (hover: hover) { .age-ruler { display: block; } }
+.age-ruler-tick { position: absolute; right: 0; height: 1px; width: 7px; background: var(--line); }
+.age-ruler-tick.is-major { width: 15px; background: color-mix(in srgb, var(--fg) 34%, var(--bg)); }
+.age-ruler-label {
+  position: absolute;
+  right: 22px;
+  transform: translateY(-50%);
+  font: 500 9.5px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--faint);
+}
+.age-ruler-marker {
+  position: absolute;
+  right: -3px;
+  width: 13px;
+  height: 13px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--ambient);
+  box-shadow: 0 0 9px var(--ambient), 0 0 22px color-mix(in srgb, var(--ambient) 55%, transparent);
+}
+.age-ruler-readout {
+  position: absolute;
+  right: 24px;
+  transform: translateY(-50%);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font: 600 10.5px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--on-accent);
+  background: var(--accent); /* the accent pair is the one tuned for contrast in both themes */
+}
+@media print { .age-ruler, .cursor-ring, .cursor-dot, .ambient-wash, .aurora { display: none !important; } }

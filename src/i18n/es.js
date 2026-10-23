@@ -1,3 +1,4 @@
+import { FINCRIME_REPO } from '../links.js'
 // Todo el texto visible, español (México). Misma estructura que en.js (scripts/verify-copy.mjs lo comprueba).
 // Se evitan los adjetivos y sustantivos con género al hablar de la persona: "Actuaría" nombra la disciplina.
 
@@ -111,13 +112,14 @@ const es = {
       desc: 'Una tabla de mortalidad para tarificar seguros de vida en México, construida con las estadísticas del propio regulador sobre unos 20 millones de vidas aseguradas al año. Muestra que un seguro temporal puede tener un precio entre una quinta parte y más de la mitad menor que con la tabla regulatoria y aun así ganar su rendimiento objetivo.',
       linkDashboard: 'Abrir el dashboard en vivo',
       linkReport: 'Informe metodológico (PDF)',
+      linkHandbook: 'Leer las matemáticas: el manual',
       whatTitle: 'Qué construí',
       what: [
         'Reconstruí la tabla de precios con las estadísticas de vida individual del regulador: 81 mil muertes aseguradas y unos 20 millones de vidas al año, cuatro métodos de graduación comparados y un margen de error de 15% dimensionado con un análisis de sensibilidad de cada decisión del modelo.',
         'Encontré y eliminé tres trampas en los datos crudos: una quinta parte de los siniestros por fallecimiento es un libro de ajustes, 2,300 siniestros codificados como esguince son vencimientos de dotales, y las muertes deben medirse contra las vidas que tienen la cobertura de fallecimiento.',
         'Volví a tarificar y a someter a estrés todo con ella: primas, pruebas de rentabilidad y reservas, y la pandemia repetida tal como la vivió la vida asegurada (+133% en siniestros en 2021).',
-        'Versión 1, el estudio de la población: reconstruí las tablas de mortalidad de México con 3 millones de defunciones registradas, las proyecté (Lee-Carter y CBD, contrastadas en R), medí 746 mil muertes en exceso de 2020 a 2022 y armé un estudio de experiencia al estilo de una aseguradora que recupera 15 de 15 efectos sembrados. Con ella se tarificaron estructuras de reaseguro y un swap de longevidad.',
-        'Lo publiqué como dashboard en vivo de diez páginas, un libro de Excel con fórmulas vivas y un informe de 13 páginas, con 122 verificaciones de datos y más de 410 pruebas en cada commit.',
+        'Versión 1, el estudio de la población: reconstruí las tablas de mortalidad de México con 4.7 millones de defunciones registradas, las proyecté (Lee-Carter y CBD, contrastadas en R), medí 746 mil muertes en exceso de 2020 a 2022 y armé un estudio de experiencia al estilo de una aseguradora que recupera 15 de 15 efectos sembrados. Con ella se tarificaron estructuras de reaseguro y un swap de longevidad.',
+        'Lo publiqué como dashboard en vivo de diez páginas, un libro de Excel con fórmulas vivas y un informe de 13 páginas, con 122 verificaciones de datos y más de 440 pruebas en cada commit.',
       ],
       why: 'Una tabla de toda la población es la vara equivocada para cotizar: las personas que compran un seguro de vida mueren a solo entre 14% y 25% de su tasa, y la tabla regulatoria (CNSF 2013) tiene más de diez años. Las tablas de experiencia de las aseguradoras son privadas, así que esta es una alternativa transparente y probada, construida con datos oficiales y con cada decisión documentada.',
       results: [
@@ -139,20 +141,28 @@ const es = {
       },
     },
     bench: {
-      title: 'En el taller',
-      intro: 'Los siguientes proyectos. Cada uno llega aquí con demo en vivo y documentación cuando se publica.',
+      title: 'En el banco de trabajo',
+      intro: 'Los próximos proyectos. Cada uno llega aquí con una demostración en vivo y un documento cuando se publica.',
       items: [
         {
-          title: 'Credit Risk Scoring Model',
+          title: 'FinCrime Lab',
           status: 'progress',
-          desc: 'Probabilidad de incumplimiento a partir de variables financieras y de comportamiento: una regresión logística transparente frente a gradient boosting, para mostrar qué aporta la complejidad extra.',
-          tags: ['Python', 'scikit-learn', 'Finanzas'],
+          desc: 'Detección de fraude, prevención de lavado de dinero, pruebas A/B de reglas antifraude y modelado de pérdidas por contracargos para un neobanco mexicano simulado, con SQL, Python y estadística. El fraude y el lavado se siembran con verdad conocida, así que cada método se prueba con datos donde la respuesta se conoce.',
+          tags: ['Python', 'SQL (DuckDB)', 'Estadística', 'Fraude y PLD'],
+          step: { done: 4, total: 11, label: 'Paso 4 de 11: la plataforma de datos' },
+          facts: [
+            { value: '34.7M', label: 'transacciones en el banco simulado (200,000 clientes)' },
+            { value: '18 de 18', label: 'verificaciones de aceptación contra datos del censo y de encuestas' },
+            { value: '3', label: 'conjuntos de datos públicos cargados para validación externa' },
+          ],
+          href: FINCRIME_REPO,
+          hrefLabel: 'Ver el repositorio',
         },
         {
-          title: 'Reinsurance Claims Dashboard',
+          title: 'Modelo de riesgo de crédito',
           status: 'planned',
-          desc: 'Patrones de siniestros, loss ratios y desarrollo de reservas, modelado según cómo leen sus siniestros los equipos de reaseguro.',
-          tags: ['Python', 'Plotly', 'Reaseguro'],
+          desc: 'Probabilidad de incumplimiento a partir de variables financieras y de comportamiento: una regresión logística transparente frente a gradient boosting, para mostrar qué compra la complejidad extra.',
+          tags: ['Python', 'scikit-learn', 'Finanzas'],
         },
       ],
     },
@@ -338,7 +348,7 @@ const es = {
           { n: 'Excel (VBA, Solver, tablas dinámicas)', proof: 'un libro con fórmulas vivas de Dx/Nx/Mx' },
           { n: 'Desarrollo asistido por IA (Claude Code)', proof: 'construido con él, validado por mí' },
           { n: 'LaTeX (composición matemática)', eg: 'compuse fórmulas e informes técnicos' },
-          { n: 'Validación de datos y pruebas (pytest, CI)', proof: '122 verificaciones de datos y más de 410 pruebas' },
+          { n: 'Validación de datos y pruebas (pytest, CI)', proof: '122 verificaciones de datos y más de 440 pruebas' },
           { n: 'Informes con Quarto', proof: 'el informe metodológico de 13 páginas' },
         ],
       },
@@ -396,7 +406,17 @@ const es = {
     connect: 'Conectar',
   },
 
+  intro: {
+    aria: 'Animación de introducción',
+    skip: 'Saltar introducción',
+    eyebrow: 'La curva de supervivencia de 100,000 hombres mexicanos',
+    age: 'EDAD',
+    alive: 'con vida, de 100,000 al nacer',
+    name: 'Miguel Vilchis',
+  },
+
   footer: {
+    replay: 'Ver la introducción otra vez',
     rights: 'Miguel Vilchis',
     updated: date => `Actualizado ${date}`,
     built: 'Hecho con React, Vite y Tailwind · Alojado en Vercel',

@@ -44,7 +44,7 @@ with sync_playwright() as p:
     problems = []
     page.on("console", lambda m: problems.append(m.text) if m.type in ("error", "warning") else None)
     page.on("pageerror", lambda e: problems.append(str(e)))
-    page.goto(BASE, wait_until="networkidle")
+    page.goto(BASE + "/?nointro", wait_until="networkidle")
     page.wait_for_timeout(3500)
     page.screenshot(path=str(OUT / "01-hero.png"))
 
@@ -229,7 +229,7 @@ with sync_playwright() as p:
     for w, h in [(360, 740), (390, 844), (768, 1024), (1024, 768), (1280, 800), (1920, 1080)]:
         ctx = browser.new_context(viewport={"width": w, "height": h}, is_mobile=w < 700, has_touch=w < 700)
         pg = ctx.new_page()
-        pg.goto(BASE, wait_until="networkidle")
+        pg.goto(BASE + "/?nointro", wait_until="networkidle")
         pg.wait_for_timeout(1500)
         # scroll through so every reveal runs
         total = pg.evaluate("document.documentElement.scrollHeight")
@@ -255,12 +255,40 @@ with sync_playwright() as p:
     pg = ctx.new_page()
     pg.goto(BASE, wait_until="networkidle")
     pg.wait_for_timeout(1500)
+    check("system reduced motion: no intro", pg.locator(".intro").count() == 0)
     check("system reduced motion: data-motion reduced", pg.evaluate("document.documentElement.dataset.motion") == "reduced")
     check("system reduced motion: no infinite animations", infinite_animations(pg) == 0, str(infinite_animations(pg)))
     check("system reduced motion: toggle disabled", pg.locator("button[aria-label*='reduced motion']").first.is_disabled())
     pg.evaluate("document.getElementById('story').scrollIntoView()")
     pg.wait_for_timeout(800)
     check("story is stacked (not pinned) when motion is reduced", pg.locator("#story .sticky").count() == 0)
+    ctx.close()
+
+    # ── Intro: plays once for a first visit, can be skipped, never returns, can be replayed ──
+    ctx = browser.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="no-preference")
+    pg = ctx.new_page()
+    intro_problems = []
+    pg.on("console", lambda m: intro_problems.append(m.text) if m.type == "error" else None)
+    pg.goto(BASE, wait_until="domcontentloaded")
+    pg.wait_for_timeout(600)
+    check("intro: plays on a first visit", pg.locator(".intro").count() == 1)
+    check("intro: is a labelled dialog", bool(pg.locator(".intro").get_attribute("aria-label")))
+    check("intro: page behind is inert", pg.evaluate("document.querySelector('.min-h-screen').inert") is True)
+    check("intro: has a skip button", pg.locator(".intro-skip").count() == 1)
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(1200)
+    check("intro: Escape skips it", pg.locator(".intro").count() == 0)
+    check("intro: page is live afterwards", pg.evaluate("document.querySelector('.min-h-screen').inert") is False)
+    pg.reload(wait_until="domcontentloaded")
+    pg.wait_for_timeout(600)
+    check("intro: does not play again", pg.locator(".intro").count() == 0)
+    pg.locator("footer button", has_text="Replay").scroll_into_view_if_needed()
+    pg.locator("footer button", has_text="Replay").click()
+    pg.wait_for_timeout(500)
+    check("intro: footer replays it", pg.locator(".intro").count() == 1)
+    pg.wait_for_timeout(3500)
+    check("intro: ends by itself", pg.locator(".intro").count() == 0)
+    check("intro: no console errors", not intro_problems, "; ".join(intro_problems)[:200])
     ctx.close()
 
     # ── ?lang=es link ──

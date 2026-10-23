@@ -3,9 +3,10 @@ import { AnimatePresence, motion } from 'motion/react'
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
 import Reveal from './Reveal'
+import Tilt from './Tilt'
 import { BeamBorder, SpotLayer } from './Electric'
 import { useCopy } from '../i18n'
-import { DASHBOARD, REPORT, REPO } from '../links'
+import { DASHBOARD, REPORT, REPO, HANDBOOK } from '../links'
 
 /*
   The flagship card shows what a visitor most wants to check: real screenshots of the live dashboard,
@@ -177,6 +178,10 @@ function Flagship() {
               <a href={REPORT} target="_blank" rel="noopener noreferrer"
                 className={`${button} border border-line text-fg hover:border-accent/60`}>{f.linkReport}</a>
             </Magnetic>
+            <Magnetic strength={0.2} max={7}>
+              <a href={HANDBOOK} target="_blank" rel="noopener noreferrer"
+                className={`${button} border border-line text-fg hover:border-accent/60`}>{f.linkHandbook}</a>
+            </Magnetic>
           </div>
 
           <button type="button" onClick={() => setCaseOpen(o => !o)} aria-expanded={caseOpen} aria-controls="flagship-case"
@@ -250,6 +255,7 @@ function Bench() {
       <ul className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
         {c.bench.items.map((p, i) => (
           <Reveal as="li" key={p.title} delay={i * 0.1}>
+            <Tilt className="h-full rounded-xl">
             <div className="spot-card relative h-full rounded-xl border border-dashed border-line bg-card/60 p-5">
               <SpotLayer />
               <div className="relative z-10">
@@ -258,11 +264,40 @@ function Bench() {
                   <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusStyle[p.status]}`}>{c.status[p.status]}</span>
                 </div>
                 <p className="text-sm leading-relaxed text-muted">{p.desc}</p>
+                {p.step && (
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                      <span>{p.step.label}</span>
+                      <span aria-hidden="true">{Math.round((p.step.done / p.step.total) * 100)}%</span>
+                    </div>
+                    <div role="progressbar" aria-valuemin={0} aria-valuemax={p.step.total} aria-valuenow={p.step.done}
+                      aria-label={p.step.label} className="progress-neon h-1.5 overflow-hidden rounded-full bg-subtle">
+                      <span className="progress-neon-fill block h-full rounded-full" style={{ width: `${(p.step.done / p.step.total) * 100}%` }} />
+                    </div>
+                  </div>
+                )}
+                {p.facts && (
+                  <dl className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {p.facts.map(x => (
+                      <div key={x.value} className="rounded-lg border border-line bg-subtle px-3 py-2">
+                        <dt className="font-mono text-base font-medium text-accent">{x.value}</dt>
+                        <dd className="mt-0.5 text-[11.5px] leading-snug text-muted">{x.label}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {p.tags.map(t => <span key={t} className="rounded bg-subtle px-2 py-0.5 text-xs text-muted">{t}</span>)}
                 </div>
+                {p.href && (
+                  <a href={p.href} target="_blank" rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent underline-offset-4 hover:underline">
+                    {p.hrefLabel}{arrowIcon}
+                  </a>
+                )}
               </div>
             </div>
+            </Tilt>
           </Reveal>
         ))}
       </ul>
