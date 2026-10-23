@@ -105,3 +105,64 @@ Ordered by expected value. See the end of the rebuild notes for details.
 8. Split the JavaScript bundle (163 KB gzipped today) so the explorer and story load on demand.
 9. A Spanish social-preview image (link previews are fixed to one language per URL).
 10. A "How I'd approach Clara's data" one-pager: a worked mini-analysis on public fintech or credit data.
+
+## 6. Round two: what the best portfolios do, and what we took from them
+
+Four reference portfolios were opened in a real browser and captured frame by frame (dark and light, hero and first
+scroll), next to the live site. The question was not "what looks flashy" but "what makes a visitor remember it".
+
+### What each one does well
+
+| Portfolio | What it gets right | What we took |
+|---|---|---|
+| Bruno Simon | A **neon arc loader on a dark grid** is the whole identity; the first seconds are an experience, not a spinner | The intro: a neon curve drawing itself on a grid, a light dot riding it |
+| Rauno Freiberg | **One vivid accent**, a tick-ruler navigation, a crosshair cursor; everything feels engineered | The age ruler down the right edge and the light cursor ring |
+| Brittany Chiang | **Restraint**: a skip link, a spotlight that follows the pointer, very few effects done well | Keep the skip link and the cards' pointer spotlight; no effect without a purpose |
+| Josh Comeau | **Character**: rainbow accents, toggles that reward curiosity, sound and theme controls | The spectrum on the light that travels, and a replay button for the intro |
+
+### Patterns across all four
+
+1. **One signature motif** repeated everywhere. For this site it is the survival curve and the orbiting light.
+2. **The first screen is a performance**, but it is short: intros last 2 to 3 seconds, can be skipped, and never block.
+3. **Motion has a reason.** Hover, scroll and load each get one clear behavior; nothing moves "just because".
+4. **Respect for the visitor.** `prefers-reduced-motion` skips the show, there is a pause control (WCAG 2.2.2), and
+   keyboard users are never trapped.
+5. **Fast.** The best of them still paint their first screen in under 2.5 s.
+
+### What changed on the site (neon 2)
+
+| Idea | Where | How it stays safe |
+|---|---|---|
+| First-visit intro: the survival curve of 100,000 Mexican men draws itself, age counter 0 to 110, name ignites letter by letter | `Intro.jsx`, `intro.css` | Plays once (localStorage), skippable with a click, Esc or Enter, skipped under reduced motion, `?nointro` and `?intro` for links, "Replay" in the footer, page behind it is `inert` |
+| Prism beams: the orbiting light carries the full spectrum, a second fainter light circles the other way, both speed up on hover | `neon2.css` (`.beam-line`) | Same single motion switch as before |
+| Aurora bloom: a burst of color behind the hero on load that settles into a slow drift | `neon2.css` (`.aurora`) | Static under reduced motion |
+| Ambient wash: two background hues follow the section being read | `Ambient.jsx` | One IntersectionObserver; colors ease with registered CSS properties |
+| Tilt cards: project cards lean toward the pointer with a moving light | `Tilt.jsx` | Mouse and pen only; no React re-renders while moving |
+| Cursor ring: trails the pointer and swells over links | `CursorGlow.jsx` | Fine pointers only; the real cursor is kept |
+| Age ruler: scroll depth read as an age, 0 to ω = 110, click or drag to jump | `AgeRuler.jsx` | Wide screens with a mouse only; hidden from assistive technology |
+
+Content updated at the same time: the flagship now links the handbook; the real count of registered deaths (4.7 million,
+2020 to 2024) replaced "3 million"; the test count reads "more than 440"; and FinCrime Lab replaced the placeholder
+project, shown with a progress bar (step 4 of 11) and three verified facts.
+
+### Result
+
+| | Before neon 2 | After |
+|---|---|---|
+| Automated end-to-end checks | 60 | **71** (11 new ones for the intro), all passing on the live site |
+| axe-core violations (both themes) | 0 | 0 (one contrast issue in the new age badge was caught by the scan and fixed) |
+| LCP, desktop | 2.0 s | 1.7 s without the intro, 0.7 s while the intro plays |
+| LCP, mobile at 4× CPU slowdown | n/a | 2.2 s |
+| Gzipped JavaScript | 164 KB | 173 KB |
+
+### If it is too much
+
+Everything above is one switch each, so any piece can be removed without touching the rest: delete the component's line in
+`App.jsx` (Ambient, CursorGlow, AgeRuler), the `.aurora` div in `Hero.jsx`, or the `Tilt` wrapper in `Projects.jsx`. The intro
+is disabled by removing `<IntroProvider>` and `<Intro />` from `App.jsx`.
+
+### Sources
+
+Bruno Simon (bruno-simon.com), Rauno Freiberg (rauno.me), Brittany Chiang (brittanychiang.com), Josh Comeau (joshwcomeau.com),
+captured on 2026-10-23. Motion and accessibility guidance: WCAG 2.2 criterion 2.2.2 (Pause, Stop, Hide), the
+`prefers-reduced-motion` media query, and the CSS `@property` registered-custom-property feature (Chrome 85+, Safari 16.4+, Firefox 128+).
