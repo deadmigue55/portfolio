@@ -119,7 +119,7 @@ const en = {
         'Found and removed three traps in the raw data: a fifth of death claims are an adjustment ledger, 2,300 sprain-coded claims are endowment maturities, and deaths must be measured against the lives holding the death cover.',
         'Re-priced and re-stressed on it: premiums, profit tests and reserves, and the pandemic replayed as insured lives lived it (+133% claims in 2021).',
         'Version 1, the population study: rebuilt Mexico’s mortality tables from 4.7 million registered deaths, projected them (Lee-Carter and CBD, cross-checked in R), measured 746,000 excess deaths in 2020 to 2022, and built an insurer-style experience study that recovers 15 of 15 planted effects. Reinsurance structures and a longevity swap were priced on it.',
-        'Shipped as a live ten-page dashboard, an Excel workbook with live formulas and a 13-page report, with 122 data checks and more than 440 tests on every commit.',
+        'Shipped as a live ten-page dashboard, an Excel workbook with live formulas and a 13-page report, with 122 data checks and more than 650 tests on every commit.',
       ],
       why: 'A table of the whole population is the wrong yardstick for a quote: people who buy life insurance die at only 14% to 25% of its rate, and the regulatory table (CNSF 2013) is more than ten years old. Insurers’ own experience tables are private, so this is a transparent, tested alternative built from official data, with every judgement logged.',
       results: [
@@ -348,7 +348,7 @@ const en = {
           { n: 'Excel (VBA, Solver, PivotTables)', proof: 'a workbook with live Dx/Nx/Mx formulas' },
           { n: 'AI-assisted development (Claude Code)', proof: 'built with it, validated by me' },
           { n: 'LaTeX (mathematical typesetting)', eg: 'typeset formulas and technical reports' },
-          { n: 'Data checks & testing (pytest, CI)', proof: '122 data checks and more than 440 tests' },
+          { n: 'Data checks & testing (pytest, CI)', proof: '122 data checks and more than 650 tests' },
           { n: 'Reporting with Quarto', proof: 'the 13-page methodology report' },
         ],
       },

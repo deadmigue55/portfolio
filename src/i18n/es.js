@@ -119,7 +119,7 @@ const es = {
         'Encontré y eliminé tres trampas en los datos crudos: una quinta parte de los siniestros por fallecimiento es un libro de ajustes, 2,300 siniestros codificados como esguince son vencimientos de dotales, y las muertes deben medirse contra las vidas que tienen la cobertura de fallecimiento.',
         'Volví a tarificar y a someter a estrés todo con ella: primas, pruebas de rentabilidad y reservas, y la pandemia repetida tal como la vivió la vida asegurada (+133% en siniestros en 2021).',
         'Versión 1, el estudio de la población: reconstruí las tablas de mortalidad de México con 4.7 millones de defunciones registradas, las proyecté (Lee-Carter y CBD, contrastadas en R), medí 746 mil muertes en exceso de 2020 a 2022 y armé un estudio de experiencia al estilo de una aseguradora que recupera 15 de 15 efectos sembrados. Con ella se tarificaron estructuras de reaseguro y un swap de longevidad.',
-        'Lo publiqué como dashboard en vivo de diez páginas, un libro de Excel con fórmulas vivas y un informe de 13 páginas, con 122 verificaciones de datos y más de 440 pruebas en cada commit.',
+        'Lo publiqué como dashboard en vivo de diez páginas, un libro de Excel con fórmulas vivas y un informe de 13 páginas, con 122 verificaciones de datos y más de 650 pruebas en cada commit.',
       ],
       why: 'Una tabla de toda la población es la vara equivocada para cotizar: las personas que compran un seguro de vida mueren a solo entre 14% y 25% de su tasa, y la tabla regulatoria (CNSF 2013) tiene más de diez años. Las tablas de experiencia de las aseguradoras son privadas, así que esta es una alternativa transparente y probada, construida con datos oficiales y con cada decisión documentada.',
       results: [
@@ -348,7 +348,7 @@ const es = {
           { n: 'Excel (VBA, Solver, tablas dinámicas)', proof: 'un libro con fórmulas vivas de Dx/Nx/Mx' },
           { n: 'Desarrollo asistido por IA (Claude Code)', proof: 'construido con él, validado por mí' },
           { n: 'LaTeX (composición matemática)', eg: 'compuse fórmulas e informes técnicos' },
-          { n: 'Validación de datos y pruebas (pytest, CI)', proof: '122 verificaciones de datos y más de 440 pruebas' },
+          { n: 'Validación de datos y pruebas (pytest, CI)', proof: '122 verificaciones de datos y más de 650 pruebas' },
           { n: 'Informes con Quarto', proof: 'el informe metodológico de 13 páginas' },
         ],
       },

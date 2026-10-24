@@ -142,7 +142,7 @@ scroll), next to the live site. The question was not "what looks flashy" but "wh
 | Age ruler: scroll depth read as an age, 0 to ω = 110, click or drag to jump | `AgeRuler.jsx` | Wide screens with a mouse only; hidden from assistive technology |
 
 Content updated at the same time: the flagship now links the handbook; the real count of registered deaths (4.7 million,
-2020 to 2024) replaced "3 million"; the test count reads "more than 440"; and FinCrime Lab replaced the placeholder
+2020 to 2024) replaced "3 million"; the test count reads "more than 440" (now "more than 650"); and FinCrime Lab replaced the placeholder
 project, shown with a progress bar (step 4 of 11) and three verified facts.
 
 ### Result
