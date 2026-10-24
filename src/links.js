@@ -3,7 +3,8 @@ export const REPO = 'https://github.com/deadmigue55/Mortality-Table-Builder'
 export const DASHBOARD = 'https://mortality-table-builder.streamlit.app/'
 export const REPORT = `${REPO}/blob/main/reports/methodology.pdf`
 export const FINCRIME_REPO = 'https://github.com/deadmigue55/fincrime-lab'
-export const HANDBOOK = `${REPO}/blob/main/docs/handbook/README.md`
+export const DOCS = 'https://deadmigue55.github.io/Mortality-Table-Builder/'
+export const HANDBOOK = `${DOCS}handbook/`  // the typeset handbook; the same files sit in the repo
 export const SITE_REPO = 'https://github.com/deadmigue55/portfolio'
 
 export const EMAIL = 'migue.vilchis@ciencias.unam.mx'
