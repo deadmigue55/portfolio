@@ -1,10 +1,12 @@
+import { useRef } from 'react'
 import SectionHeader from './SectionHeader'
 import Magnetic from './Magnetic'
 import Reveal from './Reveal'
 import CopyButton from './CopyButton'
 import { SpotLayer } from './Electric'
 import { PlayBox } from './Previews'
-import { useCopy } from '../i18n'
+import { useCopy, useLang } from '../i18n'
+import { useGithubLive, formatAgo } from '../lib/githubLive.js'
 import { EMAIL, PHONE_DISPLAY, PHONE_TEL, WHATSAPP, LINKEDIN, LINKEDIN_HANDLE, GITHUB, GITHUB_HANDLE } from '../links'
 
 /* ── Icons ── */
@@ -129,7 +131,7 @@ function LinkedInPreview() {
   )
 }
 
-// Fixed pattern so the "contribution graph" looks the same on every visit
+// The fixed pattern shown until GitHub answers, or if it never does
 const contribCells = Array.from({ length: 7 * 20 }, (_, i) => {
   const col = Math.floor(i / 7)
   const row = i % 7
@@ -143,13 +145,16 @@ const contribShade = [
   'bg-accent shadow-[0_0_6px_var(--glow)]',
 ]
 
-// The graph fills in column by column, then the brightest days keep twinkling
-function GitHubPreview() {
+// The graph is the real one once GitHub answers (live), the fixed pattern otherwise; both fill in column by column
+function GitHubPreview({ live }) {
   const c = useCopy().contact
+  const cells = live?.weeks
+    ? live.weeks.flatMap((week, col) => week.map((level, row) => ({ col, level, key: `${col}-${row}` })))
+    : contribCells.map(({ col, level }, i) => ({ col, level, key: i }))
   return (
     <PlayBox className={previewBox}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-accent/15 grid place-items-center text-xs font-bold text-fg shadow-[0_0_14px_var(--glow)]">
+        <div className="relative w-10 h-10 shrink-0 rounded-full overflow-hidden border border-accent/40 bg-accent/15 grid place-items-center text-xs font-bold text-fg shadow-[0_0_14px_var(--glow)]">
           MV
           <img
             src={`https://github.com/${GITHUB_HANDLE}.png?size=80`}
@@ -159,17 +164,31 @@ function GitHubPreview() {
             onError={e => { e.currentTarget.style.display = 'none' }}
           />
         </div>
-        <div className="leading-tight">
+        <div className="leading-tight min-w-0">
           <p className="text-[12px] text-fg font-semibold">{GITHUB_HANDLE}</p>
-          <p className="text-[10px] text-muted">{c.githubNote}</p>
+          <p className="text-[10px] text-muted truncate">{live ? c.githubStats(live.repos, live.total) : c.githubNote}</p>
         </div>
-      </div>
-      <div className="grid grid-flow-col grid-rows-7 gap-[3px] w-fit">
-        {contribCells.map(({ col, level }, i) => (
-          <span key={i} className="pv-fade block" style={d(0.2 + col * 0.045)}>
-            <span className={`block w-2 h-2 rounded-[2px] ${contribShade[level]} ${level === 4 ? 'pv-shimmer' : ''}`}
-              style={level === 4 ? d(2 + (i % 9) * 0.35) : undefined} />
+        {live && (
+          <span className="ml-auto shrink-0 inline-flex items-center gap-1.5 text-[10px] font-medium text-good">
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-good" />
+            {c.githubLive}
           </span>
+        )}
+      </div>
+      <div
+        role={live?.weeks ? 'img' : undefined}
+        aria-label={live?.weeks ? c.githubGraphLabel(live.total) : undefined}
+        className="grid grid-flow-col grid-rows-7 gap-[3px] w-fit"
+      >
+        {cells.map(({ col, level, key }, i) => (
+          level == null
+            ? <span key={key} className="block w-2 h-2" />
+            : (
+              <span key={key} className="pv-fade block" style={d(0.2 + col * 0.045)}>
+                <span className={`block w-2 h-2 rounded-[2px] ${contribShade[level]} ${level === 4 ? 'pv-shimmer' : ''}`}
+                  style={level === 4 ? d(2 + (i % 9) * 0.35) : undefined} />
+              </span>
+            )
         ))}
       </div>
     </PlayBox>
@@ -267,8 +286,11 @@ function PhoneCard() {
 
 export default function Contact() {
   const c = useCopy().contact
+  const { lang } = useLang()
+  const section = useRef(null)
+  const live = useGithubLive(section)
   return (
-    <section id="contact" aria-labelledby="contact-title" className="py-28 px-6">
+    <section ref={section} id="contact" aria-labelledby="contact-title" className="py-28 px-6">
       <div className="max-w-5xl mx-auto">
 
         <SectionHeader id="contact-title" eyebrow={c.eyebrow} title={c.title} size="lg">{c.intro}</SectionHeader>
@@ -281,8 +303,9 @@ export default function Contact() {
               icon={Icon.linkedin} label={c.linkedin} value={`linkedin.com/in/${LINKEDIN_HANDLE}`} />
           </Reveal>
           <Reveal delay={0.12} className="h-full">
-            <LinkCard href={GITHUB} preview={<GitHubPreview />}
-              icon={Icon.github} label={c.github} value={`github.com/${GITHUB_HANDLE}`} />
+            <LinkCard href={GITHUB} preview={<GitHubPreview live={live} />}
+              icon={Icon.github} label={c.github} value={`github.com/${GITHUB_HANDLE}`}
+              note={live?.lastPush ? c.githubLastPush(formatAgo(live.lastPush.at, lang), live.lastPush.repo) : undefined} />
           </Reveal>
         </div>
       </div>

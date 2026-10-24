@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "verify": "node scripts/verify-copy.mjs && node scripts/verify-actuarial.mjs",
+    "verify": "node scripts/verify-copy.mjs && node scripts/verify-actuarial.mjs && node scripts/verify-github.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
